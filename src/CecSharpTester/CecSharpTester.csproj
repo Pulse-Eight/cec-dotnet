@@ -52,9 +52,8 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LibCecSharp, Version=4.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\Pulse-Eight\USB-CEC Adapter\x64\LibCecSharp.dll</HintPath>
+    <Reference Include="LibCecSharp">
+      <HintPath>..\..\..\..\build\amd64\LibCecSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
