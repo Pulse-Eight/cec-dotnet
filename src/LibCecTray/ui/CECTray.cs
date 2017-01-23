@@ -345,7 +345,7 @@ namespace LibCECTray.ui
 
     private void BMuteClick(object sender, EventArgs e)
     {
-      Controller.Lib.MuteAudio(true);
+      Controller.Lib.MuteAudio();
     }
 
     private void BRescanDevicesClick(object sender, EventArgs e)
