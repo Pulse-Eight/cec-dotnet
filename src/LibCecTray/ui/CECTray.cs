@@ -74,10 +74,10 @@ namespace LibCECTray.ui
 
     protected override void SetVisibleCore(bool value)
     {
-      if (Controller.Settings.StartHidden.Value)
+      if (Controller.Settings.StartHidden.Value && !this.IsHandleCreated)
       {
         value = false;
-        if (!this.IsHandleCreated) CreateHandle();
+        CreateHandle();
       }
       base.SetVisibleCore(value);
     }
@@ -511,12 +511,10 @@ namespace LibCECTray.ui
     {
       if (Visible && WindowState != FormWindowState.Minimized)
       {
-        Controller.Settings.StartHidden.Value = true;
         Hide();
       }
       else
       {
-        Controller.Settings.StartHidden.Value = false;
         Show();
       }
     }
