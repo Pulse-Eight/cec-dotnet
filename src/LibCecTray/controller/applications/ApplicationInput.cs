@@ -47,7 +47,8 @@ namespace LibCECTray.controller.applications
     Generic = 0,
     CloseControllerApplication = 1,
     StartApplication = 2,
-    SendKey = 3
+    SendKey = 3,
+    SuspendPc = 4
   }
 
   /// <summary>
@@ -297,6 +298,8 @@ namespace LibCECTray.controller.applications
           return Resources.action_type_start_application;
         case ActionType.SendKey:
           return Resources.action_type_sendkey;
+        case ActionType.SuspendPc:
+          return Resources.action_type_suspend_pc;
         default:
           return type.ToString();
       }
@@ -408,6 +411,9 @@ namespace LibCECTray.controller.applications
         if (addAction == null || addAction.Empty())
           addAction = ApplicationActionStart.FromString(controller, item);
 
+        if (addAction == null || addAction.Empty())
+          addAction = ApplicationActionSuspendPc.FromString(controller, item);
+
         if (addAction != null && !addAction.Empty())
           retVal.Append(addAction);
       }
@@ -432,10 +438,75 @@ namespace LibCECTray.controller.applications
         case ActionType.StartApplication:
           Append(new ApplicationActionStart(Controller));
           break;
+        case ActionType.SuspendPc:
+          Append(new ApplicationActionSuspendPc(Controller));
+          break;
       }
       return this;
     }
 
     private readonly List<ApplicationAction> _input = new List<ApplicationAction>();
+  }
+  
+  /// <summary>
+  /// Suspends the host PC
+  /// </summary>
+  internal class ApplicationActionSuspendPc : ApplicationAction
+  {
+    public ApplicationActionSuspendPc(ApplicationController controller) :
+      base(controller, ActionType.SuspendPc)
+    {
+    }
+
+    public override bool Transmit(IntPtr windowHandle)
+    {
+      return Application.SetSuspendState(PowerState.Suspend, true, false);
+    }
+
+    public override string AsString()
+    {
+      return TypePrefix;
+    }
+
+    public override string AsFriendlyString()
+    {
+      return string.Format("[{0}]", Resources.action_type_suspend_pc);
+    }
+
+    public override bool Empty()
+    {
+      return false;
+    }
+
+    public override bool CanAppend(ApplicationAction value)
+    {
+      return false;
+    }
+
+    public override ApplicationAction Append(ApplicationAction value)
+    {
+      return this;
+    }
+
+    public override ApplicationAction RemoveKey(int index)
+    {
+      return null;
+    }
+
+    public static ApplicationAction FromString(ApplicationController controller, string value)
+    {
+      ApplicationActionSuspendPc retVal = new ApplicationActionSuspendPc(controller);
+      return value.Trim().Equals(retVal.AsString()) ? retVal : null;
+    }
+
+    public static bool HasDefaultValue(CecKeypress key)
+    {
+      return DefaultValue(key) != null;
+    }
+
+    public static ApplicationAction DefaultValue(CecKeypress key)
+    {
+      return null;
+    }
   }
 }

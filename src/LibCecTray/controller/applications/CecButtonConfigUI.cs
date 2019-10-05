@@ -65,6 +65,7 @@ namespace LibCECTray.controller.applications
       //TODO
       cbAddAction.Items.Add(ApplicationInput.FriendlyActionName(ActionType.CloseControllerApplication));
       cbAddAction.Items.Add(ApplicationInput.FriendlyActionName(ActionType.StartApplication));
+      cbAddAction.Items.Add(ApplicationInput.FriendlyActionName(ActionType.SuspendPc));
 
       // take the icon of the main window
       ComponentResourceManager resources = new ComponentResourceManager(typeof(CECTray));
