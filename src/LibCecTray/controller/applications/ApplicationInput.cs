@@ -436,6 +436,12 @@ namespace LibCECTray.controller.applications
       return this;
     }
 
+    public ApplicationInput Clear()
+    {
+      _input.Clear();
+      return this;
+    }
+
     private readonly List<ApplicationAction> _input = new List<ApplicationAction>();
   }
 }

@@ -112,7 +112,7 @@ namespace LibCECTray.controller.applications
 
     private void BClearClick(object sender, EventArgs e)
     {
-      _button.Value = null;
+      _button.Value = _button.Value.Clear();
     }
 
     private void BAddKeyClick(object sender, EventArgs e)
