@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CecSharpCoreTest": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

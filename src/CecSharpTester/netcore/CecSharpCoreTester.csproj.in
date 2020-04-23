@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <StartupObject>CecSharpClient.CecSharpClient</StartupObject>
+    <Platforms>x86;x64</Platforms>
+    <Version>${LIBCEC_VERSION_MAJOR}.${LIBCEC_VERSION_MINOR}.${LIBCEC_VERSION_PATCH}.0</Version>
+    <Copyright>Copyright (c) Pulse-Eight Limited 2011-2020</Copyright>
+    <Company>Pulse-Eight Limited</Company>
+    <Authors>Lars Op den Kamp</Authors>
+    <Product>libCEC</Product>
+    <PackageProjectUrl>https://github.com/Pulse-Eight/libcec</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Pulse-Eight/libcec</RepositoryUrl>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>..\..\..\build\x64\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>..\..\..\build\x64\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>..\..\..\build\x86\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>..\..\..\build\x86\</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\CecSharpClient.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="LibCecSharpCore">
+      <HintPath>..\..\..\..\..\build\ref\netcore\LibCecSharpCore.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
