@@ -626,4 +626,7 @@ CEC will not work (properly) if the TV does not support CEC, or has CEC disabled
   <data name="application_foreground" xml:space="preserve">
     <value>Foreground application</value>
   </data>
+  <data name="action_type_suspend_pc" xml:space="preserve">
+    <value>suspend PC</value>
+  </data>
 </root>

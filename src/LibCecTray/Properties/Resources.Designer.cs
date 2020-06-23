@@ -286,6 +286,15 @@ namespace LibCECTray.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to suspend PC.
+        /// </summary>
+        internal static string action_type_suspend_pc {
+            get {
+                return ResourceManager.GetString("action_type_suspend_pc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add new application.
         /// </summary>
         internal static string add_new_application {
