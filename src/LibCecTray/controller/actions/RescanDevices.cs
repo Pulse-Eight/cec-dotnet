@@ -53,7 +53,7 @@ namespace LibCECTray.controller.actions
       SendEvent(UpdateEventType.PollDevices);
 
       SendEvent(UpdateEventType.ProgressBar, 100);
-      SendEvent(UpdateEventType.StatusText, Resources.ready);
+      SendEvent(UpdateEventType.StatusReady);
     }
 
     private readonly LibCecSharp _lib;

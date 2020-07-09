@@ -28,8 +28,8 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>4.0.4.%2a</ApplicationVersion>
-    <ApplicationIcon>..\..\..\project\favicon.ico</ApplicationIcon>
+    <ApplicationVersion>6.0.0.%2a</ApplicationVersion>
+    <ApplicationIcon>..\..\..\project\p8_logo.ico</ApplicationIcon>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>

@@ -1,34 +1,37 @@
 ﻿/*
- * This file is part of the libCEC(R) library.
- *
- * libCEC(R) is Copyright (C) 2011-2013 Pulse-Eight Limited.  All rights reserved.
- * libCEC(R) is an original work, containing original code.
- *
- * libCEC(R) is a trademark of Pulse-Eight Limited.
- *
- * This program is dual-licensed; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- *
- * Alternatively, you can license this library under a commercial license,
- * please contact Pulse-Eight Licensing for more information.
- *
- * For more information contact:
- * Pulse-Eight Licensing       <license@pulse-eight.com>
- *     http://www.pulse-eight.com/
- *     http://www.pulse-eight.net/
- */
+* This file is part of the libCEC(R) library.
+*
+* libCEC(R) is Copyright (C) 2011-2020 Pulse-Eight Limited.  All rights reserved.
+* libCEC(R) is an original work, containing original code.
+*
+* libCEC(R) is a trademark of Pulse-Eight Limited.
+*
+* This program is dual-licensed; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*
+*
+* Alternatively, you can license this library under a commercial license,
+* please contact Pulse-Eight Licensing for more information.
+*
+* For more information contact:
+* Pulse-Eight Licensing       <license@pulse-eight.com>
+*     http://www.pulse-eight.com/
+*     http://www.pulse-eight.net/
+*
+* Author: Lars Op den Kamp <lars@opdenkamp.eu>
+*
+*/
 
 using System;
 using System.Diagnostics;
@@ -69,6 +72,12 @@ namespace LibCECTray.controller.applications
       return new ApplicationController(controller, splitString[0], splitString[1], splitString[2], splitString[3]);
     }
 
+    public virtual bool HasVisibleTab {
+      get {
+        return !IsInternal || (ApplicationFilename.Length == 0) || ExeFound;
+      }
+    }
+
     public string AsString()
     {
       return string.Format("{0};{1};{2};{3}", UiName, ProcessName, ApplicationFilename, ApplicationWorkingDirectory);
@@ -80,26 +89,26 @@ namespace LibCECTray.controller.applications
 
       DataGridViewCell buttonCellTemplate = new DataGridViewTextBoxCell();
       CecButtonGridView.Columns.Add(new DataGridViewColumn(buttonCellTemplate)
-                                      {
-                                        DataPropertyName = "CecButtonName",
-                                        Name = Resources.config_cec_button,
-                                        ReadOnly = true,
-                                        Width = 150
-                                      });
+      {
+        DataPropertyName = "CecButtonName",
+        Name = Resources.config_cec_button,
+        ReadOnly = true,
+        Width = 150
+      });
 
       DataGridViewButtonCell mappedToCellTemplate = new DataGridViewButtonCell();
       CecButtonGridView.Columns.Add(new DataGridViewColumn(mappedToCellTemplate)
-                                      {
-                                        DataPropertyName = "MappedButtonName",
-                                        Name = Resources.config_button_mapped_to,
-                                        ReadOnly = true,
-                                        Width = 350
-                                      });
+      {
+        DataPropertyName = "MappedButtonName",
+        Name = Resources.config_button_mapped_to,
+        ReadOnly = true,
+        Width = 350
+      });
 
       bindingSource.DataSource = ButtonConfig;
       CecButtonGridView.DataSource = bindingSource;
 
-      gridView.CellFormatting += delegate(object sender, DataGridViewCellFormattingEventArgs args)
+      gridView.CellFormatting += delegate (object sender, DataGridViewCellFormattingEventArgs args)
                                    {
                                      DataGridView grid = sender as DataGridView;
                                      var data = grid != null ? grid.Rows[args.RowIndex].DataBoundItem as CecButtonConfigItem : null;
@@ -109,7 +118,7 @@ namespace LibCECTray.controller.applications
                                      }
                                    };
 
-      gridView.CellClick += delegate(object sender, DataGridViewCellEventArgs args)
+      gridView.CellClick += delegate (object sender, DataGridViewCellEventArgs args)
                               {
                                 var item = args.RowIndex < ButtonConfig.Count ? ButtonConfig[args.RowIndex] : null;
                                 if (item == null)
@@ -120,13 +129,13 @@ namespace LibCECTray.controller.applications
                                 }
                                 else
                                 {
-                                  var mappedButton = ButtonConfig[item.Key]; 
+                                  var mappedButton = ButtonConfig[item.Key];
                                   if (mappedButton == null || mappedButton.Value.Empty())
                                     return;
 
-                                    var controlWindow = FindInstance();
-                                    if (controlWindow != IntPtr.Zero && item.Key.Duration == 0)
-                                      mappedButton.Value.Transmit(controlWindow);
+                                  var controlWindow = FindInstance();
+                                  if (controlWindow != IntPtr.Zero && item.Key.Duration == 0)
+                                    mappedButton.Value.Transmit(controlWindow);
                                 }
                               };
 
@@ -140,6 +149,15 @@ namespace LibCECTray.controller.applications
     }
 
     #region Start and stop the application
+    /// <summary>
+    /// Check whether the executable is found
+    /// </summary>
+    public bool ExeFound {
+      get {
+        return File.Exists(ApplicationWorkingDirectory + @"\" + ApplicationFilename);
+      }
+    }
+
     /// <summary>
     /// Check if the application is running
     /// </summary>
@@ -313,15 +331,13 @@ namespace LibCECTray.controller.applications
     /// <summary>
     /// True when this application should be autostarted when this application is activated, or made the active source
     /// </summary>
-    public CECSettingBool AutoStartApplication
-    {
-      get
-      {
+    public CECSettingBool AutoStartApplication {
+      get {
         if (!Settings.ContainsKey(ProcessName + "_autostart"))
         {
           CECSettingBool setting = new CECSettingBool(ProcessName + "_autostart", "Autostart application", false, null);
-          Settings.Load(setting);
           Settings[ProcessName + "_autostart"] = setting;
+          setting.Load();
         }
         return Settings[ProcessName + "_autostart"].AsSettingBool;
       }
@@ -330,15 +346,13 @@ namespace LibCECTray.controller.applications
     /// <summary>
     /// True when keypresses should be routed to this application
     /// </summary>
-    public CECSettingBool ControlApplication
-    {
-      get
-      {
+    public CECSettingBool ControlApplication {
+      get {
         if (!Settings.ContainsKey(ProcessName + "_control"))
         {
           CECSettingBool setting = new CECSettingBool(ProcessName + "_control", "Control application", true, null);
-          Settings.Load(setting);
           Settings[ProcessName + "_control"] = setting;
+          setting.Load();
         }
         return Settings[ProcessName + "_control"].AsSettingBool;
       }
@@ -347,15 +361,13 @@ namespace LibCECTray.controller.applications
     /// <summary>
     /// True when this application should be autostarted when this application is activated, or made the active source
     /// </summary>
-    public CECSettingBool SuppressKeypressWhenSelected
-    {
-      get
-      {
+    public CECSettingBool SuppressKeypressWhenSelected {
+      get {
         if (!Settings.ContainsKey(ProcessName + "_suppress_when_selected"))
         {
           CECSettingBool setting = new CECSettingBool(ProcessName + "_suppress_when_selected", "Suppress keypress when this tab is selected", true, null);
-          Settings.Load(setting);
           Settings[ProcessName + "_suppress_when_selected"] = setting;
+          setting.Load();
         }
         return Settings[ProcessName + "_suppress_when_selected"].AsSettingBool;
       }
@@ -364,34 +376,29 @@ namespace LibCECTray.controller.applications
     /// <summary>
     /// True when the application should be started in full screen mode
     /// </summary>
-    public CECSettingBool StartFullScreen
-    {
-      get
-      {
+    public CECSettingBool StartFullScreen {
+      get {
         if (!Settings.ContainsKey(ProcessName + "_start_fullscreen"))
         {
           CECSettingBool setting = new CECSettingBool(ProcessName + "_start_fullscreen", "Start in full screen mode", true, null);
-          Settings.Load(setting);
           Settings[ProcessName + "_start_fullscreen"] = setting;
+          setting.Load();
         }
         return Settings[ProcessName + "_start_fullscreen"].AsSettingBool;
       }
     }
 
     protected ControllerTabPage UIControlInternal;
-    public virtual ControllerTabPage UiControl
-    {
+    public virtual ControllerTabPage UiControl {
       get { return UIControlInternal ?? (UIControlInternal = new ApplicationControllerUI(this, ProcessName == "")); }
     }
 
     private CecButtonConfig _buttonConfig;
-    public CecButtonConfig ButtonConfig
-    {
+    public CecButtonConfig ButtonConfig {
       get { return _buttonConfig ?? (_buttonConfig = new CecButtonConfig(this)); }
     }
 
-    public CECSettings Settings
-    {
+    public CECSettings Settings {
       get { return Controller.Settings; }
     }
     protected DataGridView CecButtonGridView;
@@ -407,16 +414,13 @@ namespace LibCECTray.controller.applications
     }
 
     public bool IsInternal { protected set; get; }
-    public bool CanConfigureProcess
-    {
-      get
-      {
+    public bool CanConfigureProcess {
+      get {
         return !IsInternal;
       }
     }
 
     private bool _applicationRunning;
-
     protected readonly CECController Controller;
 
     #endregion

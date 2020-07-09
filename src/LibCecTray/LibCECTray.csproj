@@ -57,11 +57,11 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>4.0.4.%2a</ApplicationVersion>
+    <ApplicationVersion>6.0.0.%2a</ApplicationVersion>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <ApplicationIcon>..\..\project\favicon.ico</ApplicationIcon>
+    <ApplicationIcon>..\..\project\p8_logo.ico</ApplicationIcon>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
@@ -70,7 +70,8 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LibCecSharp">
+    <Reference Include="LibCecSharp, Version=6.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\build\ref\LibCecSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -128,9 +129,11 @@
     </Compile>
     <Compile Include="controller\applications\internal\ForegroundAppController.cs" />
     <Compile Include="controller\CECController.cs" />
+    <Compile Include="controller\SystemIdleMonitor.cs" />
     <Compile Include="settings\CECSettingBool.cs" />
     <Compile Include="settings\CECSettingByte.cs" />
     <Compile Include="settings\CECSettingDeviceType.cs" />
+    <Compile Include="settings\CecSettingIdleTime.cs" />
     <Compile Include="settings\CECSettingLogicalAddress.cs" />
     <Compile Include="settings\CECSettingLogicalAddresses.cs" />
     <Compile Include="settings\CECSettingNumeric.cs" />
@@ -208,7 +211,13 @@
     <Compile Include="controller\applications\internal\WMCController.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="project\favicon.ico" />
+    <None Include="Resources\warning.png" />
+    <None Include="Resources\alert.png" />
+    <None Include="Resources\settings.png" />
+    <None Include="Resources\power.png" />
+    <None Include="Resources\tv.png" />
+    <None Include="Resources\computer.png" />
+    <None Include="Resources\hdmi.png" />
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>

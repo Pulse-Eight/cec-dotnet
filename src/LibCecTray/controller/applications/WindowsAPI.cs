@@ -1,34 +1,37 @@
 ﻿/*
- * This file is part of the libCEC(R) library.
- *
- * libCEC(R) is Copyright (C) 2011-2013 Pulse-Eight Limited.  All rights reserved.
- * libCEC(R) is an original work, containing original code.
- *
- * libCEC(R) is a trademark of Pulse-Eight Limited.
- *
- * This program is dual-licensed; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- *
- * Alternatively, you can license this library under a commercial license,
- * please contact Pulse-Eight Licensing for more information.
- *
- * For more information contact:
- * Pulse-Eight Licensing       <license@pulse-eight.com>
- *     http://www.pulse-eight.com/
- *     http://www.pulse-eight.net/
- */
+* This file is part of the libCEC(R) library.
+*
+* libCEC(R) is Copyright (C) 2011-2020 Pulse-Eight Limited.  All rights reserved.
+* libCEC(R) is an original work, containing original code.
+*
+* libCEC(R) is a trademark of Pulse-Eight Limited.
+*
+* This program is dual-licensed; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*
+*
+* Alternatively, you can license this library under a commercial license,
+* please contact Pulse-Eight Licensing for more information.
+*
+* For more information contact:
+* Pulse-Eight Licensing       <license@pulse-eight.com>
+*     http://www.pulse-eight.com/
+*     http://www.pulse-eight.net/
+*
+* Author: Lars Op den Kamp <lars@opdenkamp.eu>
+*
+*/
 
 using System;
 using System.Runtime.InteropServices;
@@ -270,7 +273,7 @@ namespace LibCECTray.controller.applications
       ShowNormal = 1
     }
 
-    #pragma warning disable 649
+#pragma warning disable 649
     public struct MouseInput
     {
       public Int32 X;
@@ -311,7 +314,39 @@ namespace LibCECTray.controller.applications
       public InputType Type;
       public CombinedInput Data;
     }
-    #pragma warning restore 649
+#pragma warning restore 649
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct LASTINPUTINFO
+    {
+      public static readonly int SizeOf = Marshal.SizeOf(typeof(LASTINPUTINFO));
+      [MarshalAs(UnmanagedType.U4)]
+      public int cbSize;
+      [MarshalAs(UnmanagedType.U4)]
+      public UInt32 dwTime;
+    }
+
+    public const int WM_POWERBROADCAST = 0x0218;
+    public const int WM_SYSCOMMAND = 0x0112;
+
+    public const int PBT_APMSUSPEND = 0x0004;
+    public const int PBT_APMRESUMESUSPEND = 0x0007;
+    public const int PBT_APMRESUMECRITICAL = 0x0006;
+    public const int PBT_APMRESUMEAUTOMATIC = 0x0012;
+    public const int PBT_POWERSETTINGCHANGE = 0x8013;
+
+    public static Guid GUID_SYSTEM_AWAYMODE = new Guid("98a7f580-01f7-48aa-9c0f-44352c29e5c0");
+
+    public const int SC_SCREENSAVE = 0xF140;
+    public const int SPI_GETSCREENSAVERRUNNING = 0x0072;
+
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    internal struct POWERBROADCAST_SETTING
+    {
+      public Guid PowerSetting;
+      public uint DataLength;
+      public byte Data;
+    }
     #endregion
 
     #region DllImports
@@ -370,6 +405,12 @@ namespace LibCECTray.controller.applications
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+    [DllImport("user32.dll")]
+    static extern bool GetLastInputInfo(ref LASTINPUTINFO info);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    static extern bool SystemParametersInfo(int action, int param, ref int retval, int updini);
     #endregion
 
     /// <summary>
@@ -453,6 +494,43 @@ namespace LibCECTray.controller.applications
       }
 
       return null;
+    }
+
+    /// <summary>
+    /// System idle in number of ticks
+    /// </summary>
+    /// <returns>The requested number of ticks, or -1 on error</returns>
+    public static int SystemIdleTicks()
+    {
+      LASTINPUTINFO lastInputInfo = new LASTINPUTINFO();
+      lastInputInfo.cbSize = Marshal.SizeOf(lastInputInfo);
+      lastInputInfo.dwTime = 0;
+      return GetLastInputInfo(ref lastInputInfo) ?
+          (Environment.TickCount - (int)lastInputInfo.dwTime) :
+          -1;
+    }
+
+    /// <summary>
+    /// System idle in number of seconds
+    /// </summary>
+    /// <returns>The requested number of seconds, or -1 on error</returns>
+    public static int SystemIdleSeconds()
+    {
+      int idleTicks = SystemIdleTicks();
+      return idleTicks > 0 ?
+          (idleTicks / 1000) :
+          idleTicks;
+    }
+
+    /// <summary>
+    /// Check whether the screensaver is active
+    /// </summary>
+    /// <returns>True if the screensaver is active</returns>
+    public static bool ScreensaverActive()
+    {
+      int active = 1;
+      SystemParametersInfo(SPI_GETSCREENSAVERRUNNING, 0, ref active, 0);
+      return active == 1;
     }
   }
 }

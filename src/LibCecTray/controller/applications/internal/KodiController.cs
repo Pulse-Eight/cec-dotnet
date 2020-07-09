@@ -1,35 +1,37 @@
 ﻿/*
- * This file is part of the libCEC(R) library.
- *
- * libCEC(R) is Copyright (C) 2011-2013 Pulse-Eight Limited.  All rights reserved.
- * libCEC(R) is an original work, containing original code.
- *
- * libCEC(R) is a trademark of Pulse-Eight Limited.
- *
- * This program is dual-licensed; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- *
- * Alternatively, you can license this library under a commercial license,
- * please contact Pulse-Eight Licensing for more information.
- *
- * For more information contact:
- * Pulse-Eight Licensing       <license@pulse-eight.com>
- *     http://www.pulse-eight.com/
- *     http://www.pulse-eight.net/
- */
-
+* This file is part of the libCEC(R) library.
+*
+* libCEC(R) is Copyright (C) 2011-2020 Pulse-Eight Limited.  All rights reserved.
+* libCEC(R) is an original work, containing original code.
+*
+* libCEC(R) is a trademark of Pulse-Eight Limited.
+*
+* This program is dual-licensed; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*
+*
+* Alternatively, you can license this library under a commercial license,
+* please contact Pulse-Eight Licensing for more information.
+*
+* For more information contact:
+* Pulse-Eight Licensing       <license@pulse-eight.com>
+*     http://www.pulse-eight.com/
+*     http://www.pulse-eight.net/
+*
+* Author: Lars Op den Kamp <lars@opdenkamp.eu>
+*
+*/
 using System;
 using System.Globalization;
 using System.IO;
@@ -60,7 +62,14 @@ namespace LibCECTray.controller.applications.@internal
       ApplicationRunningChanged += RunningChanged;
     }
 
-	  static void RunningChanged(bool running)
+    public override bool HasVisibleTab {
+      get {
+        // just do Kodi config in Kodi
+        return false;
+      }
+    }
+
+    static void RunningChanged(bool running)
     {
       if (running)
       {
@@ -275,203 +284,191 @@ namespace LibCECTray.controller.applications.@internal
 
     public void SaveXMLConfiguration()
     {
-      Settings.Persist();
+      Settings.Save();
 
-      var xbmcDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\kodi\userdata\peripheral_data";
-      if (!Directory.Exists(xbmcDir))
-        Directory.CreateDirectory(xbmcDir);
+      //var xbmcDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\kodi\userdata\peripheral_data";
+      //if (!Directory.Exists(xbmcDir))
+      //  Directory.CreateDirectory(xbmcDir);
 
-      if (!Directory.Exists(xbmcDir))
-      {
-        // couldn't create directory
-        MessageBox.Show(string.Format(Resources.could_not_create_directory, xbmcDir), Resources.error,
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-        return;
-      }
+      //if (!Directory.Exists(xbmcDir))
+      //{
+      //  // couldn't create directory
+      //  MessageBox.Show(string.Format(Resources.could_not_create_directory, xbmcDir), Resources.error,
+      //                  MessageBoxButtons.OK, MessageBoxIcon.Error);
+      //  return;
+      //}
 
-      SaveFileDialog dialog = new SaveFileDialog
-      {
-        Title = Resources.store_settings_where,
-        InitialDirectory = xbmcDir,
-        FileName = string.Format("usb_{0:X}_{1:X}.xml", Program.Instance.Controller.AdapterVendorId, Program.Instance.Controller.AdapterProductId),
-        Filter = Resources.xml_file_filter,
-        FilterIndex = 1
-      };
-      if (dialog.ShowDialog() != DialogResult.OK) return;
+      //SaveFileDialog dialog = new SaveFileDialog
+      //{
+      //  Title = Resources.store_settings_where,
+      //  InitialDirectory = xbmcDir,
+      //  FileName = string.Format("usb_{0:X}_{1:X}.xml", Program.Instance.Controller.AdapterVendorId, Program.Instance.Controller.AdapterProductId),
+      //  Filter = Resources.xml_file_filter,
+      //  FilterIndex = 1
+      //};
+      //if (dialog.ShowDialog() != DialogResult.OK) return;
 
-      FileStream fs = null;
-      string error = string.Empty;
-      try
-      {
-        fs = (FileStream)dialog.OpenFile();
-      }
-      catch (Exception ex)
-      {
-        error = ex.Message;
-      }
-      if (fs == null)
-      {
-        MessageBox.Show(string.Format(Resources.cannot_open_file, dialog.FileName) + (error.Length > 0 ? ": " + error : string.Empty), Resources.app_name, MessageBoxButtons.OK, MessageBoxIcon.Error);
-      }
-      else
-      {
-        StreamWriter writer = new StreamWriter(fs);
-        StringBuilder output = new StringBuilder();
-        output.AppendLine("<settings>");
-        output.AppendLine("<setting id=\"cec_hdmi_port\" value=\"" + Settings.HDMIPort.Value + "\" />");
-        output.AppendLine("<setting id=\"connected_device\" value=\"" + (Settings.ConnectedDevice.Value == CecLogicalAddress.AudioSystem ? 36038 : 36037) + "\" />");
-        output.AppendLine("<setting id=\"cec_power_on_startup\" value=\"" + (Settings.ActivateSource.Value ? 1 : 0) + "\" />");
-        output.AppendLine("<setting id=\"cec_power_off_shutdown\" value=\"" + (Settings.PowerOffDevices.Value.IsSet(CecLogicalAddress.Broadcast) ? 1 : 0) + "\" />");
-        output.AppendLine("<setting id=\"cec_standby_screensaver\" value=\"" + (StandbyScreensaver.Value ? 1 : 0) + "\" />");
-        output.AppendLine("<setting id=\"standby_pc_on_tv_standby\" value=\"" + (PowerOffOnStandby.Value ? 1 : 0) + "\" />");
-        output.AppendLine("<setting id=\"use_tv_menu_language\" value=\"" + (UseTVLanguage.Value ? 1 : 0) + "\" />");
-        output.AppendLine("<setting id=\"enabled\" value=\"1\" />");
-        output.AppendLine("<setting id=\"port\" value=\"\" />");
+      //FileStream fs = null;
+      //string error = string.Empty;
+      //try
+      //{
+      //  fs = (FileStream)dialog.OpenFile();
+      //}
+      //catch (Exception ex)
+      //{
+      //  error = ex.Message;
+      //}
+      //if (fs == null)
+      //{
+      //  MessageBox.Show(string.Format(Resources.cannot_open_file, dialog.FileName) + (error.Length > 0 ? ": " + error : string.Empty), Resources.app_name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+      //}
+      //else
+      //{
+      //  StreamWriter writer = new StreamWriter(fs);
+      //  StringBuilder output = new StringBuilder();
+      //  output.AppendLine("<settings>");
+      //  output.AppendLine("<setting id=\"cec_hdmi_port\" value=\"" + Settings.HDMIPort.Value + "\" />");
+      //  output.AppendLine("<setting id=\"connected_device\" value=\"" + (Settings.ConnectedDevice.Value == CecLogicalAddress.AudioSystem ? 36038 : 36037) + "\" />");
+      //  output.AppendLine("<setting id=\"cec_power_on_startup\" value=\"" + (Settings.ActivateSource.Value ? 1 : 0) + "\" />");
+      //  output.AppendLine("<setting id=\"cec_power_off_shutdown\" value=\"" + (Settings.PowerOffDevices.Value.IsSet(CecLogicalAddress.Broadcast) ? 1 : 0) + "\" />");
+      //  output.AppendLine("<setting id=\"cec_standby_screensaver\" value=\"" + (StandbyScreensaver.Value ? 1 : 0) + "\" />");
+      //  output.AppendLine("<setting id=\"standby_pc_on_tv_standby\" value=\"" + (PowerOffOnStandby.Value ? 1 : 0) + "\" />");
+      //  output.AppendLine("<setting id=\"use_tv_menu_language\" value=\"" + (UseTVLanguage.Value ? 1 : 0) + "\" />");
+      //  output.AppendLine("<setting id=\"enabled\" value=\"1\" />");
+      //  output.AppendLine("<setting id=\"port\" value=\"\" />");
 
-        // only supported by 1.5.0+ clients
-        output.AppendLine("<!-- the following lines are only supported by v1.5.0+ clients -->");
-        output.AppendLine("<setting id=\"activate_source\" value=\"" + (Settings.ActivateSource.Value ? 1 : 0) + "\" />");
-        output.AppendLine("<setting id=\"physical_address\" value=\"" + string.Format("{0,4:X}", Settings.OverridePhysicalAddress.Value ? Settings.PhysicalAddress.Value : 0).Trim() + "\" />");
-        output.AppendLine("<setting id=\"device_type\" value=\"" + (int)Settings.DeviceType.Value + "\" />");
-        output.AppendLine("<setting id=\"tv_vendor\" value=\"" + string.Format("{0,6:X}", Settings.OverrideTVVendor.Value ? (int)Settings.TVVendor.Value : 0).Trim() + "\" />");
+      //  // only supported by 1.5.0+ clients
+      //  output.AppendLine("<!-- the following lines are only supported by v1.5.0+ clients -->");
+      //  output.AppendLine("<setting id=\"activate_source\" value=\"" + (Settings.ActivateSource.Value ? 1 : 0) + "\" />");
+      //  output.AppendLine("<setting id=\"physical_address\" value=\"" + string.Format("{0,4:X}", Settings.OverridePhysicalAddress.Value ? Settings.PhysicalAddress.Value : 0).Trim() + "\" />");
+      //  output.AppendLine("<setting id=\"device_type\" value=\"" + (int)Settings.DeviceType.Value + "\" />");
+      //  output.AppendLine("<setting id=\"tv_vendor\" value=\"" + string.Format("{0,6:X}", Settings.OverrideTVVendor.Value ? (int)Settings.TVVendor.Value : 0).Trim() + "\" />");
 
-        if (HasAdvancedDeviceIdSet(Settings.WakeDevices.Value))
-        {
-          output.Append("<setting id=\"wake_devices_advanced\" value=\"");
-          StringBuilder strWakeDevices = new StringBuilder();
-          foreach (CecLogicalAddress addr in Settings.WakeDevices.Value.Addresses)
-            if (addr != CecLogicalAddress.Unknown)
-              strWakeDevices.Append(" " + (int)addr);
-          output.Append(strWakeDevices.ToString().Trim());
-          output.AppendLine("\" />");
-        }
+      //  if (HasAdvancedDeviceIdSet(Settings.WakeDevices.Value))
+      //  {
+      //    output.Append("<setting id=\"wake_devices_advanced\" value=\"");
+      //    StringBuilder strWakeDevices = new StringBuilder();
+      //    foreach (CecLogicalAddress addr in Settings.WakeDevices.Value.Addresses)
+      //      if (addr != CecLogicalAddress.Unknown)
+      //        strWakeDevices.Append(" " + (int)addr);
+      //    output.Append(strWakeDevices.ToString().Trim());
+      //    output.AppendLine("\" />");
+      //  }
 
-        if (Settings.WakeDevices.Value.IsSet(CecLogicalAddress.Tv) &&
-            Settings.WakeDevices.Value.IsSet(CecLogicalAddress.AudioSystem))
-          output.Append("<setting id=\"wake_devices\" value=\"36039\">");
-        else if (Settings.WakeDevices.Value.IsSet(CecLogicalAddress.Tv))
-          output.Append("<setting id=\"wake_devices\" value=\"36037\">");
-        else if (Settings.WakeDevices.Value.IsSet(CecLogicalAddress.AudioSystem))
-          output.Append("<setting id=\"wake_devices\" value=\"36038\">");
-        else
-          output.Append("<setting id=\"wake_devices\" value=\"231\">");
+      //  if (Settings.WakeDevices.Value.IsSet(CecLogicalAddress.Tv) &&
+      //      Settings.WakeDevices.Value.IsSet(CecLogicalAddress.AudioSystem))
+      //    output.Append("<setting id=\"wake_devices\" value=\"36039\">");
+      //  else if (Settings.WakeDevices.Value.IsSet(CecLogicalAddress.Tv))
+      //    output.Append("<setting id=\"wake_devices\" value=\"36037\">");
+      //  else if (Settings.WakeDevices.Value.IsSet(CecLogicalAddress.AudioSystem))
+      //    output.Append("<setting id=\"wake_devices\" value=\"36038\">");
+      //  else
+      //    output.Append("<setting id=\"wake_devices\" value=\"231\">");
 
-        if (HasAdvancedDeviceIdSet(Settings.PowerOffDevices.Value))
-        {
-          output.Append("<setting id=\"standby_devices_advanced\" value=\"");
-          StringBuilder strSleepDevices = new StringBuilder();
-          foreach (CecLogicalAddress addr in Settings.PowerOffDevices.Value.Addresses)
-            if (addr != CecLogicalAddress.Unknown)
-              strSleepDevices.Append(" " + (int) addr);
-          output.Append(strSleepDevices.ToString().Trim());
-          output.AppendLine("\" />");
-        }
+      //  if (HasAdvancedDeviceIdSet(Settings.PowerOffDevices.Value))
+      //  {
+      //    output.Append("<setting id=\"standby_devices_advanced\" value=\"");
+      //    StringBuilder strSleepDevices = new StringBuilder();
+      //    foreach (CecLogicalAddress addr in Settings.PowerOffDevices.Value.Addresses)
+      //      if (addr != CecLogicalAddress.Unknown)
+      //        strSleepDevices.Append(" " + (int) addr);
+      //    output.Append(strSleepDevices.ToString().Trim());
+      //    output.AppendLine("\" />");
+      //  }
 
-        if (Settings.PowerOffDevices.Value.IsSet(CecLogicalAddress.Tv) &&
-            Settings.PowerOffDevices.Value.IsSet(CecLogicalAddress.AudioSystem))
-          output.Append("<setting id=\"standby_devices\" value=\"36039\">");
-        else if (Settings.PowerOffDevices.Value.IsSet(CecLogicalAddress.Tv))
-          output.Append("<setting id=\"standby_devices\" value=\"36037\">");
-        else if (Settings.PowerOffDevices.Value.IsSet(CecLogicalAddress.AudioSystem))
-          output.Append("<setting id=\"standby_devices\" value=\"36038\">");
-        else
-          output.Append("<setting id=\"standby_devices\" value=\"231\">");
+      //  if (Settings.PowerOffDevices.Value.IsSet(CecLogicalAddress.Tv) &&
+      //      Settings.PowerOffDevices.Value.IsSet(CecLogicalAddress.AudioSystem))
+      //    output.Append("<setting id=\"standby_devices\" value=\"36039\">");
+      //  else if (Settings.PowerOffDevices.Value.IsSet(CecLogicalAddress.Tv))
+      //    output.Append("<setting id=\"standby_devices\" value=\"36037\">");
+      //  else if (Settings.PowerOffDevices.Value.IsSet(CecLogicalAddress.AudioSystem))
+      //    output.Append("<setting id=\"standby_devices\" value=\"36038\">");
+      //  else
+      //    output.Append("<setting id=\"standby_devices\" value=\"231\">");
 
-        // only supported by 1.5.1+ clients
-        output.AppendLine("<!-- the following lines are only supported by v1.5.1+ clients -->");
-        output.AppendLine("<setting id=\"send_inactive_source\" value=\"" + (SendInactiveSource.Value ? 1 : 0) + "\" />");
+      //  // only supported by 1.5.1+ clients
+      //  output.AppendLine("<!-- the following lines are only supported by v1.5.1+ clients -->");
+      //  output.AppendLine("<setting id=\"send_inactive_source\" value=\"" + (SendInactiveSource.Value ? 1 : 0) + "\" />");
 
-        // only supported by 1.9.0+ clients
-        output.AppendLine("<setting id=\"pause_playback_on_deactivate\" value=\"" + (PausePlaybackOnDeactivate.Value ? 1 : 0) + "\" />");
+      //  // only supported by 1.9.0+ clients
+      //  output.AppendLine("<setting id=\"pause_playback_on_deactivate\" value=\"" + (PausePlaybackOnDeactivate.Value ? 1 : 0) + "\" />");
 
-        output.AppendLine("</settings>");
-        writer.Write(output.ToString());
-        writer.Close();
-        fs.Close();
-        fs.Dispose();
-        MessageBox.Show(Resources.settings_stored, Resources.app_name, MessageBoxButtons.OK, MessageBoxIcon.Information);
-      }
+      //  output.AppendLine("</settings>");
+      //  writer.Write(output.ToString());
+      //  writer.Close();
+      //  fs.Close();
+      //  fs.Dispose();
+      //  MessageBox.Show(Resources.settings_stored, Resources.app_name, MessageBoxButtons.OK, MessageBoxIcon.Information);
+      //}
     }
 
-    public CECSettingBool UseTVLanguage
-    {
-      get
-      {
+    public CECSettingBool UseTVLanguage {
+      get {
         if (!Settings.ContainsKey(ProcessName + "_use_tv_language"))
         {
           CECSettingBool setting = new CECSettingBool(ProcessName + "_use_tv_language", Resources.app_use_tv_language, true, null);
-          Settings.Load(setting);
           Settings[ProcessName + "_use_tv_language"] = setting;
+          setting.Load();
         }
         return Settings[ProcessName + "_use_tv_language"].AsSettingBool;
       }
     }
 
-    public CECSettingBool StandbyScreensaver
-    {
-      get
-      {
+    public CECSettingBool StandbyScreensaver {
+      get {
         if (!Settings.ContainsKey(ProcessName + "_standby_screensaver"))
         {
           CECSettingBool setting = new CECSettingBool(ProcessName + "_standby_screensaver", Resources.app_standby_screensaver, true, null);
-          Settings.Load(setting);
           Settings[ProcessName + "_standby_screensaver"] = setting;
+          setting.Load();
         }
         return Settings[ProcessName + "_standby_screensaver"].AsSettingBool;
       }
     }
 
-    public CECSettingBool ActivateSource
-    {
-      get
-      {
+    public CECSettingBool ActivateSource {
+      get {
         if (!Settings.ContainsKey(ProcessName + "_activate_source"))
         {
           CECSettingBool setting = new CECSettingBool(ProcessName + "_activate_source", Resources.global_activate_source, true, null);
-          Settings.Load(setting);
           Settings[ProcessName + "_activate_source"] = setting;
+          setting.Load();
         }
         return Settings[ProcessName + "_activate_source"].AsSettingBool;
       }
     }
 
-    public CECSettingBool PowerOffOnStandby
-    {
-      get
-      {
+    public CECSettingBool PowerOffOnStandby {
+      get {
         if (!Settings.ContainsKey(ProcessName + "_standby_on_tv_standby"))
         {
           CECSettingBool setting = new CECSettingBool(ProcessName + "_standby_on_tv_standby", Resources.app_standby_on_tv_standby, true, null);
-          Settings.Load(setting);
           Settings[ProcessName + "_standby_on_tv_standby"] = setting;
+          setting.Load();
         }
         return Settings[ProcessName + "_standby_on_tv_standby"].AsSettingBool;
       }
     }
 
-    public CECSettingBool SendInactiveSource
-    {
-      get
-      {
+    public CECSettingBool SendInactiveSource {
+      get {
         if (!Settings.ContainsKey(ProcessName + "_send_inactive_source"))
         {
           CECSettingBool setting = new CECSettingBool(ProcessName + "_send_inactive_source", Resources.app_send_inactive_source, true, null);
-          Settings.Load(setting);
           Settings[ProcessName + "_send_inactive_source"] = setting;
+          setting.Load();
         }
         return Settings[ProcessName + "_send_inactive_source"].AsSettingBool;
       }
     }
 
-    public CECSettingBool PausePlaybackOnDeactivate
-    {
-      get
-      {
+    public CECSettingBool PausePlaybackOnDeactivate {
+      get {
         if (!Settings.ContainsKey(ProcessName + "_pause_playback_on_deactivate"))
         {
           CECSettingBool setting = new CECSettingBool(ProcessName + "_pause_playback_on_deactivate", Resources.app_pause_playback_on_deactivate, true, null);
-          Settings.Load(setting);
           Settings[ProcessName + "_pause_playback_on_deactivate"] = setting;
+          setting.Load();
         }
         return Settings[ProcessName + "_pause_playback_on_deactivate"].AsSettingBool;
       }

@@ -1,34 +1,37 @@
 ﻿/*
- * This file is part of the libCEC(R) library.
- *
- * libCEC(R) is Copyright (C) 2011-2013 Pulse-Eight Limited.  All rights reserved.
- * libCEC(R) is an original work, containing original code.
- *
- * libCEC(R) is a trademark of Pulse-Eight Limited.
- *
- * This program is dual-licensed; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- *
- * Alternatively, you can license this library under a commercial license,
- * please contact Pulse-Eight Licensing for more information.
- *
- * For more information contact:
- * Pulse-Eight Licensing       <license@pulse-eight.com>
- *     http://www.pulse-eight.com/
- *     http://www.pulse-eight.net/
- */
+* This file is part of the libCEC(R) library.
+*
+* libCEC(R) is Copyright (C) 2011-2020 Pulse-Eight Limited.  All rights reserved.
+* libCEC(R) is an original work, containing original code.
+*
+* libCEC(R) is a trademark of Pulse-Eight Limited.
+*
+* This program is dual-licensed; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*
+*
+* Alternatively, you can license this library under a commercial license,
+* please contact Pulse-Eight Licensing for more information.
+*
+* For more information contact:
+* Pulse-Eight Licensing       <license@pulse-eight.com>
+*     http://www.pulse-eight.com/
+*     http://www.pulse-eight.net/
+*
+* Author: Lars Op den Kamp <lars@opdenkamp.eu>
+*
+*/
 
 using System;
 using System.Collections.Generic;
@@ -39,7 +42,9 @@ using LibCECTray.controller.applications;
 using LibCECTray.settings;
 using LibCECTray.ui;
 using Microsoft.Win32;
-using LibCECTray.controller.applications.@internal;
+using System.Threading;
+using System.Diagnostics;
+using System.IO;
 
 namespace LibCECTray.controller
 {
@@ -66,28 +71,33 @@ namespace LibCECTray.controller
     {
       if (setting.KeyName == CECSettings.KeyHDMIPort)
       {
-        CECSettingByte byteSetting = setting as CECSettingByte;
-        if (byteSetting != null)
+        if (setting is CECSettingByte byteSetting &&
+          byteSetting.Value != 0)
         {
-          if (!Settings.OverridePhysicalAddress.Value)
-            Config.HDMIPort = byteSetting.Value;
+          Settings.OverridePhysicalAddress.Value = false;
+          Settings.DetectPhysicalAddress.Value = false;
+          Config.HDMIPort = byteSetting.Value;
           CECActions.SetConnectedDevice(Settings.ConnectedDevice.Value, byteSetting.Value);
         }
       }
       else if (setting.KeyName == CECSettings.KeyConnectedToHDMIDevice)
       {
-        CECSettingLogicalAddress laSetting = setting as CECSettingLogicalAddress;
-        if (laSetting != null)
+        if (setting is CECSettingLogicalAddress laSetting &&
+          laSetting.Value != CecLogicalAddress.Unknown)
         {
-          if (!Settings.OverridePhysicalAddress.Value)
-            Config.BaseDevice = laSetting.Value;
+          Settings.HDMIPort.Label.Text = string.Format(Resources.global_hdmi_port, CECSettingLogicalAddress.FormatValue((int)setting.Value));
+          Settings.OverridePhysicalAddress.Value = false;
+          Settings.DetectPhysicalAddress.Value = false;
+          Config.BaseDevice = laSetting.Value;
           CECActions.SetConnectedDevice(laSetting.Value, Settings.HDMIPort.Value);
         }
       }
       else if (setting.KeyName == CECSettings.KeyPhysicalAddress)
       {
-        CECSettingUShort ushortSetting = setting as CECSettingUShort;
-        if (ushortSetting != null && Settings.OverridePhysicalAddress.Value && Config.PhysicalAddress != ushortSetting.Value)
+        if (setting is CECSettingUShort ushortSetting &&
+          Settings.OverridePhysicalAddress.Value &&
+          !Settings.DetectPhysicalAddress.Value &&
+          (Config.PhysicalAddress != ushortSetting.Value))
         {
           Config.PhysicalAddress = ushortSetting.Value;
           CECActions.SetPhysicalAddress(ushortSetting.Value);
@@ -95,15 +105,16 @@ namespace LibCECTray.controller
       }
       else if (setting.KeyName == CECSettings.KeyOverridePhysicalAddress)
       {
-        CECSettingBool boolSetting = setting as CECSettingBool;
-        if (boolSetting != null)
+        if (setting is CECSettingBool boolSetting)
         {
           Settings.PhysicalAddress.Enabled = boolSetting.Value;
           Settings.HDMIPort.Enabled = !boolSetting.Value;
           Settings.ConnectedDevice.Enabled = !boolSetting.Value;
+          Settings.DetectPhysicalAddress.Enabled = !boolSetting.Value;
+          Settings.DetectPhysicalAddress.Value = false;
           if (boolSetting.Value)
           {
-            Config.BaseDevice = Settings.ConnectedDevice.Value;
+            Config.BaseDevice = CecLogicalAddress.Unknown;
             Config.HDMIPort = 0;
             Config.PhysicalAddress = Settings.PhysicalAddress.Value;
           }
@@ -117,8 +128,7 @@ namespace LibCECTray.controller
       }
       else if (setting.KeyName == CECSettings.KeyDeviceType)
       {
-        CECSettingDeviceType dtSetting = setting as CECSettingDeviceType;
-        if (dtSetting != null)
+        if (setting is CECSettingDeviceType dtSetting)
         {
           if (dtSetting.Value != Config.DeviceTypes.Types[0] && Settings.OverrideTVVendor.Value)
           {
@@ -134,8 +144,7 @@ namespace LibCECTray.controller
       }
       else if (setting.KeyName == CECSettings.KeyOverrideTVVendor)
       {
-        CECSettingBool boolSetting = setting as CECSettingBool;
-        if (boolSetting != null)
+        if (setting is CECSettingBool boolSetting)
         {
           Settings.TVVendor.Enabled = boolSetting.Value;
           Settings.TVVendor.Value = boolSetting.Value ? Lib.GetDeviceVendorId(CecLogicalAddress.Tv) : CecVendorId.Unknown;
@@ -144,41 +153,58 @@ namespace LibCECTray.controller
       }
       else if (setting.KeyName == CECSettings.KeyActivateSource)
       {
-        CECSettingBool boolSetting = setting as CECSettingBool;
-        if (boolSetting != null)
+        if (setting is CECSettingBool boolSetting)
           Config.ActivateSource = boolSetting.Value;
       }
       else if (setting.KeyName == CECSettings.KeyTVVendor)
       {
-        CECSettingVendorId vendorSetting = setting as CECSettingVendorId;
-        if (vendorSetting != null && Settings.OverrideTVVendor.Value)
+        if (setting is CECSettingVendorId vendorSetting && Settings.OverrideTVVendor.Value)
           Config.TvVendor = vendorSetting.Value;
       }
       else if (setting.KeyName == CECSettings.KeyWakeDevices)
       {
-        CECSettingLogicalAddresses laSetting = setting as CECSettingLogicalAddresses;
-        if (laSetting != null)
+        if (setting is CECSettingLogicalAddresses laSetting)
           Config.WakeDevices = laSetting.Value;
       }
       else if (setting.KeyName == CECSettings.KeyPowerOffDevices)
       {
-        CECSettingLogicalAddresses laSetting = setting as CECSettingLogicalAddresses;
-        if (laSetting != null)
+        if (setting is CECSettingLogicalAddresses laSetting)
           Config.PowerOffDevices = laSetting.Value;
+      }
+      else if (setting.KeyName == CECSettings.KeyTVAutoPowerOn)
+      {
+        if (setting is CECSettingBool boolSetting)
+          Config.AutoPowerOn = (boolSetting.Value ? BoolSetting.Enabled : BoolSetting.Disabled);
+      }
+      else if (setting.KeyName == CECSettings.KeyDetectPhysicalAddress)
+      {
+        if (setting is CECSettingBool boolSetting)
+        {
+          Settings.OverridePhysicalAddress.Enabled = !boolSetting.Value;
+          if (!boolSetting.Value)
+          {
+            Settings.OverridePhysicalAddress.Value = false;
+            Settings.ConnectedDevice.Enabled = true;
+            Settings.HDMIPort.Enabled = true;
+          }
+        }
       }
     }
 
     /// <summary>
-    /// Persist all known settings in the registry
+    /// Save all known settings in the registry and write them to the EEPROM of the adapter
     /// </summary>
-    public void PersistSettings()
+    public void SaveSettings()
     {
-      /* save settings in the eeprom */
-      Lib.SetConfiguration(Config);
-      Lib.PersistConfiguration(Config);
-
-      /* and in the registry */
-      Settings.Persist();
+      if (!Lib.SetConfiguration(Config))
+      {
+        Debug.WriteLine("failed to update settings");
+        return;
+      }
+      if (!Settings.Save())
+      {
+        Debug.WriteLine("failed to update registry settings");
+      }
     }
 
     /// <summary>
@@ -206,28 +232,60 @@ namespace LibCECTray.controller
     public void Initialise()
     {
       // only load once
-      if (_initialised)
+      if (Initialised)
         return;
-      _initialised = true;
+      Initialised = true;
       Applications.Initialise(this);
       SetControlsEnabled(false);
-      CECActions.ConnectToDevice(Config);
+      Thread.Sleep(1);
+      Open();
+    }
+
+    public void Open()
+    {
+      _lib.EnableCallbacks();
+      if (!_started)
+      {
+        _started = true;
+        CECActions.ConnectToDevice(Config);
+      }
+    }
+
+    public void UpdateAlertStatus()
+    {
+      if (CecWarnings.Count != 0)
+      {
+        switch (CecWarnings.First.Value)
+        {
+          case CecAlert.TVPollFailed:
+            SetStatusText(Resources.status_tv_poll_failed);
+            break;
+          default:
+            break;
+        }
+        _gui.SetControlVisible(_gui.pbAlert, true);
+      }
+      else
+      {
+        SetStatusText(Resources.ready);
+        _gui.SetControlVisible(_gui.pbAlert, false);
+      }
     }
 
     private void PowerModeChanged(object sender, PowerModeChangedEventArgs e)
     {
-        switch (e.Mode)
-        {
-            case PowerModes.Suspend:
-                _lib.DisableCallbacks();
-                break;
-            case PowerModes.Resume:
-                _lib.Close();
-                CECActions.ConnectToDevice(Config);
-                break;
-            default:
-                break;
-        }
+      switch (e.Mode)
+      {
+        case PowerModes.Suspend:
+          _lib.DisableCallbacks();
+          break;
+        case PowerModes.Resume:
+          Close();
+          Open();
+          break;
+        default:
+          break;
+      }
     }
 
     /// <summary>
@@ -235,10 +293,17 @@ namespace LibCECTray.controller
     /// </summary>
     public void Close()
     {
-      Lib.DisableCallbacks();
-      Lib.StandbyDevices(CecLogicalAddress.Broadcast);
-      Lib.Close();
-      _initialised = false;
+      SystemIdleMonitor.Instance.Suspended = true;
+      lock (this)
+      {
+        if (Initialised && _started)
+        {
+          Lib.DisableCallbacks();
+          Lib.StandbyDevices(CecLogicalAddress.Broadcast);
+          Lib.Close();
+          _started = false;
+        }
+      }
     }
 
     /// <summary>
@@ -251,13 +316,22 @@ namespace LibCECTray.controller
       if (_applications.Contains(app)) return false;
       _applications.Add(app);
 
-      _gui.SuspendLayout();
-      _gui.TabControls.Add(app.UiControl);
-      _gui.ResumeLayout();
+      if (app.HasVisibleTab)
+      {
+        _gui.SuspendLayout();
+        _gui.TabControls.Add(app.UiControl);
+        _gui.ResumeLayout();
+      }
 
       app.Initialise();
 
       return true;
+    }
+
+    public static string FirmwareUpgradeExe {
+      get {
+        return AppDomain.CurrentDomain.BaseDirectory + @"..\..\" + Resources.cec_firmware_filename;
+      }
     }
 
     #region GUI controls
@@ -287,6 +361,11 @@ namespace LibCECTray.controller
     public void DisplayDialog(Form control, bool modal)
     {
       _gui.DisplayDialog(control, modal);
+    }
+
+    public void SetReady()
+    {
+      UpdateAlertStatus();
     }
 
     /// <summary>
@@ -398,39 +477,39 @@ namespace LibCECTray.controller
 
     public override int ReceiveAlert(CecAlert alert, CecParameter data)
     {
-      switch (alert)
+      if (!CecWarnings.Contains(alert))
       {
-        case CecAlert.ServiceDevice:
-          MessageBox.Show(Resources.alert_service_device, Resources.cec_alert, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-          break;
-        case CecAlert.ConnectionLost:
-          MessageBox.Show(Resources.alert_connection_lost, Resources.cec_alert, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-          break;
-        case CecAlert.PermissionError:
-          MessageBox.Show(Resources.alert_permission_error, Resources.cec_alert, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-          break;
-        case CecAlert.PortBusy:
-          MessageBox.Show(Resources.alert_port_busy, Resources.cec_alert, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-          break;
-        case CecAlert.PhysicalAddressError:
-          MessageBox.Show(Resources.alert_physical_address_error, Resources.cec_alert, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-          break;
-        case CecAlert.TVPollFailed:
-          MessageBox.Show(Resources.alert_tv_poll_failed, Resources.cec_alert, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-          break;
+        CecWarnings.AddLast(alert);
+        UpdateAlertStatus();
       }
       return 1;
     }
 
     public override int ConfigurationChanged(LibCECConfiguration config)
     {
-      Settings.PhysicalAddress.Value = Config.PhysicalAddress;
-      Settings.ConnectedDevice.Value = Config.BaseDevice == CecLogicalAddress.AudioSystem ? CecLogicalAddress.AudioSystem : CecLogicalAddress.Tv;
-      Settings.HDMIPort.Value = Config.HDMIPort;
+      Config.Update(config);
+      Settings.PhysicalAddress.Value = config.PhysicalAddress;
+      if (config.AutodetectAddress)
+      {
+        Settings.DetectPhysicalAddress.Value = true;
+        Settings.ConnectedDevice.Value = CecLogicalAddress.Unknown;
+        Settings.HDMIPort.Value = 0;
+        _gui.SetControlEnabled(Settings.ConnectedDevice.ValueControl, false);
+        _gui.SetControlEnabled(Settings.HDMIPort.ValueControl, false);
+      }
+      else
+      {
+        Settings.ConnectedDevice.Value = config.BaseDevice == CecLogicalAddress.AudioSystem ? CecLogicalAddress.AudioSystem : CecLogicalAddress.Tv;
+        Settings.HDMIPort.Value = config.HDMIPort;
+        Settings.DetectPhysicalAddress.Value = false;
+        _gui.SetControlEnabled(Settings.ConnectedDevice.ValueControl, true);
+        _gui.SetControlEnabled(Settings.HDMIPort.ValueControl, true);
+      }
       Settings.WakeDevices.Value = Config.WakeDevices;
       Settings.PowerOffDevices.Value = Config.PowerOffDevices;
       Settings.ActivateSource.Value = Config.ActivateSource;
       Settings.DeviceType.Value = config.DeviceTypes.Types[0];
+      Settings.TVAutoPowerOn.Value = (config.AutoPowerOn == BoolSetting.Enabled);
 
       if (config.TvVendor != CecVendorId.Unknown)
       {
@@ -443,6 +522,24 @@ namespace LibCECTray.controller
       }
 
       _gui.SetControlText(_gui, Resources.app_name + " - libCEC " + Lib.VersionToString(Config.ServerVersion));
+
+      if (Config.AdapterType == CecAdapterType.PulseEightExternal || Config.AdapterType == CecAdapterType.PulseEightDaughterboard)
+      {
+        var versionAvailable = int.Parse(Resources.cec_firmware_version);
+        _gui.SetControlVisible(_gui.pbFirmwareUpgrade, true);
+        _gui.SetControlVisible(_gui.lFirmware, true);
+        _gui.SetControlVisible(_gui.lFirmwareVersion, true);
+        _gui.SetControlVisible(_gui.bFirmwareUpgrade, (File.Exists(FirmwareUpgradeExe)));
+        _gui.SetControlText(_gui.lFirmwareVersion, "v" + Config.FirmwareVersion + " " + Config.FirmwareBuildDate);
+        _gui.SetControlEnabled(_gui.bFirmwareUpgrade, ((Config.FirmwareVersion < versionAvailable) || (Config.FirmwareVersion > 100)));
+      } else
+      {
+        _gui.SetControlVisible(_gui.pbFirmwareUpgrade, false);
+        _gui.SetControlVisible(_gui.lFirmware, false);
+        _gui.SetControlVisible(_gui.lFirmwareVersion, false);
+        _gui.SetControlVisible(_gui.bFirmwareUpgrade, false);
+      }
+      _gui.SetControlVisible(Settings.TVAutoPowerOn.ValueControl, (Config.FirmwareVersion >= 9));
 
       CECActions.UpdatePhysicalAddress();
       return 1;
@@ -482,7 +579,7 @@ namespace LibCECTray.controller
     private readonly List<ApplicationController> _applications = new List<ApplicationController>();
 
     /// <summary>
-    /// Settings that are persisted in the registry (when not using the default value)
+    /// Settings that are saved in the registry (when not using the default value)
     /// </summary>
     public CECSettings Settings
     {
@@ -490,20 +587,28 @@ namespace LibCECTray.controller
     }
     private CECSettings _settings;
 
+    public LinkedList<CecAlert> CecWarnings = new LinkedList<CecAlert>();
+
     /// <summary>
     /// libCEC configuration for the application
     /// </summary>
-    private LibCECConfiguration Config
+    public LibCECConfiguration Config
     {
       get
       {
         if (_config == null)
         {
-          _config = new LibCECConfiguration { DeviceName = "CEC Tray", ClientVersion = LibCECConfiguration.CurrentVersion };
-          _config.DeviceTypes.Types[0] = CecDeviceType.RecordingDevice;
-          _config.SetCallbacks(this);
+          _config = new LibCECConfiguration {
+            DeviceName = "CEC Tray",
+            ClientVersion = LibCECConfiguration.CurrentVersion,
+            ActivateSource = Settings.ActivateSource.Value,
+            WakeDevices = Settings.WakeDevices.Value,
+            PowerOffDevices = Settings.PowerOffDevices.Value,
+          };
+          _config.DeviceTypes.Types[0] = Settings.DeviceType.Value;
 
-          if (Settings.OverridePhysicalAddress.Value)
+          if (Settings.OverridePhysicalAddress.Value &&
+            !Settings.DetectPhysicalAddress.Value)
           {
             _config.PhysicalAddress = Settings.PhysicalAddress.Value;
             _config.HDMIPort = 0;
@@ -515,12 +620,8 @@ namespace LibCECTray.controller
             _config.HDMIPort = Settings.HDMIPort.Value;
             _config.BaseDevice = Settings.ConnectedDevice.Value;
           }
-          _config.ActivateSource = Settings.ActivateSource.Value;
-          _config.DeviceTypes.Types[0] = Settings.DeviceType.Value;
           if (Settings.OverrideTVVendor.Value)
             _config.TvVendor = Settings.TVVendor.Value;
-          _config.WakeDevices = Settings.WakeDevices.Value;
-          _config.PowerOffDevices = Settings.PowerOffDevices.Value;
         }
         return _config;
       }
@@ -567,20 +668,20 @@ namespace LibCECTray.controller
       get { return Lib.GetAdapterProductId(); }
     }
 
-
     /// <summary>
     /// libCEC
     /// </summary>
     public LibCecSharp Lib
     {
-      get { return _lib ?? (_lib = new LibCecSharp(Config)); }
+      get { return _lib ?? (_lib = new LibCecSharp(this, Config)); }
     }
     private LibCecSharp _lib;
 
     private readonly CECTray _gui;
     public Actions CECActions;
     private bool _deviceChangeWarningDisplayed;
-    private bool _initialised;
+    public bool Initialised { get; private set; }
+    private bool _started = false;
 
     #endregion
   }

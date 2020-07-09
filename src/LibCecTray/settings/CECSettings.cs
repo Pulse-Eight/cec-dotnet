@@ -40,9 +40,6 @@ namespace LibCECTray.settings
 {
   class CECSettings
   {
-    private const string RegistryCompanyName = "Pulse-Eight";
-    private const string RegistryApplicationName = "libCECTray";
-
     #region Key names
     public static string KeyHDMIPort = "global_hdmi_port";
     public static string KeyConnectedToHDMIDevice = "global_connected_to_hdmi_device";
@@ -57,6 +54,9 @@ namespace LibCECTray.settings
     public static string KeyPowerOffDevices = "global_standby_devices";
     public static string KeyStartHidden = "global_start_hidden";
     public static string KeyStopTvStandby = "global_stop_tv_standby";
+    public static string KeyStandbyScreen = "global_standby_screen";
+    public static string KeyTVAutoPowerOn = "global_tv_auto_power_on";
+    public static string KeyDetectPhysicalAddress = "global_detect_physical_address";
     #endregion
 
     public CECSettings(CECSetting.SettingChangedHandler changedHandler)
@@ -79,61 +79,37 @@ namespace LibCECTray.settings
     /// </summary>
     private void Load()
     {
-      using (var subRegKey = Registry.CurrentUser.OpenSubKey(RegistryKeyName, true))
-      {
-        if (subRegKey == null) return;
-        foreach (var setting in _settings.Values)
-          if (!setting.KeyName.StartsWith("global_"))
-            setting.Load(subRegKey);
-        subRegKey.Close();
-      }
+      foreach (var setting in _settings.Values)
+        setting.Load();
     }
 
     /// <summary>
-    /// Load a setting value from the registry
-    /// </summary>
-    /// <param name="setting">The setting to load</param>
-    public void Load(CECSetting setting)
-    {
-      using (var subRegKey = Registry.CurrentUser.OpenSubKey(RegistryKeyName, true))
-      {
-        if (subRegKey == null) return;
-        setting.Load(subRegKey);
-        subRegKey.Close();
-      }
-      setting.SettingChanged += OnSettingChanged;
-    }
-
-    /// <summary>
-    /// Persist all settings in the registry
+    /// Save all settings in the registry
     /// </summary>
     /// <returns>True when persisted, false otherwise</returns>
-    public bool Persist()
+    public bool Save()
     {
-      if (CreateRegistryKey())
-      {
-        using (var subRegKey = Registry.CurrentUser.OpenSubKey(RegistryKeyName, true))
-        {
-          if (subRegKey != null)
-          {
-            foreach (var setting in _settings.Values)
-              setting.Persist(subRegKey);
-            subRegKey.Close();
-            return true;
-          }
-        }
-      }
-      return false;
+      foreach (var setting in _settings.Values)
+        setting.Save();
+      return true;
     }
 
     private bool EnableHDMIPortSetting(CECSetting setting, bool value)
     {
-      return value && !OverridePhysicalAddress.Value;
+      return value && !OverridePhysicalAddress.Value &&
+        !DetectPhysicalAddress.Value;
     }
 
     private bool EnablePhysicalAddressSetting(CECSetting setting, bool value)
     {
-      return value && OverridePhysicalAddress.Value;
+      return value &&
+        OverridePhysicalAddress.Value &&
+        !DetectPhysicalAddress.Value;
+    }
+
+    private bool EnableDetectAddressSetting(CECSetting setting, bool value)
+    {
+      return value && !OverridePhysicalAddress.Value;
     }
 
     private bool EnableSettingTVVendor(CECSetting setting, bool value)
@@ -143,36 +119,31 @@ namespace LibCECTray.settings
 
     private void OnSettingChanged(CECSetting setting, object oldValue, object newValue)
     {
-      if (SettingChanged != null)
-        SettingChanged(setting, oldValue, newValue);
+      SettingChanged?.Invoke(setting, oldValue, newValue);
     }
 
     #region Global settings
-    public CECSettingByte HDMIPort
-    {
-      get
-      {
+    public CECSettingByte HDMIPort {
+      get {
         if (!_settings.ContainsKey(KeyHDMIPort))
         {
-          CECSettingByte setting = new CECSettingByte(KeyHDMIPort, "HDMI port", 1, _changedHandler) { LowerLimit = 1, UpperLimit = 15, EnableSetting = EnableHDMIPortSetting };
-          setting.Format += delegate(object sender, ListControlConvertEventArgs args)
+          string label = string.Format(Resources.global_hdmi_port, CECSettingLogicalAddress.FormatValue((int)ConnectedDevice.Value));
+          CECSettingByte setting = new CECSettingByte(KeyHDMIPort, label, 1, _changedHandler) { LowerLimit = 1, UpperLimit = 15, EnableSetting = EnableHDMIPortSetting };
+          setting.Format += delegate (object sender, ListControlConvertEventArgs args)
           {
-            ushort tmp;
-            if (ushort.TryParse((string)args.Value, out tmp))
+            if (ushort.TryParse((string)args.Value, out ushort tmp))
               args.Value = "HDMI " + args.Value;
           };
-
-          Load(setting);
           _settings[KeyHDMIPort] = setting;
+          setting.Load();
+          setting.SettingChanged += OnSettingChanged;
         }
         return _settings[KeyHDMIPort].AsSettingByte;
       }
     }
 
-    public CECSettingLogicalAddress ConnectedDevice
-    {
-      get
-      {
+    public CECSettingLogicalAddress ConnectedDevice {
+      get {
         if (!_settings.ContainsKey(KeyConnectedToHDMIDevice))
         {
           CecLogicalAddresses allowedMask = new CecLogicalAddresses();
@@ -180,81 +151,94 @@ namespace LibCECTray.settings
           CECSettingLogicalAddress setting = new CECSettingLogicalAddress(KeyConnectedToHDMIDevice,
                                                                           Resources.global_connected_to_hdmi_device,
                                                                           CecLogicalAddress.Tv, _changedHandler)
-                                               {
-                                                 AllowedAddressMask = allowedMask,
-                                                 Enabled = false,
-                                                 EnableSetting = EnableHDMIPortSetting
-                                               };
-          Load(setting);
+          {
+            AllowedAddressMask = allowedMask,
+            EnableSetting = EnableHDMIPortSetting
+          };
           _settings[KeyConnectedToHDMIDevice] = setting;
+          setting.Load();
+          setting.SettingChanged += OnSettingChanged;
         }
         return _settings[KeyConnectedToHDMIDevice].AsSettingLogicalAddress;
       }
     }
 
-    public CECSettingBool ActivateSource
-    {
-      get
-      {
+    public CECSettingBool ActivateSource {
+      get {
         if (!_settings.ContainsKey(KeyActivateSource))
         {
           CECSettingBool setting = new CECSettingBool(KeyActivateSource, Resources.global_activate_source, true,
-                                                      _changedHandler) {Enabled = false};
-          Load(setting);
+                                                      _changedHandler)
+          { Enabled = false };
           _settings[KeyActivateSource] = setting;
+          setting.Load();
+          setting.SettingChanged += OnSettingChanged;
         }
         return _settings[KeyActivateSource].AsSettingBool;
       }
     }
 
-    public CECSettingBool AdvancedMode
-    {
-      get
-      {
+    public CECSettingBool AdvancedMode {
+      get {
         if (!_settings.ContainsKey(KeyAdvancedMode))
         {
           CECSettingBool setting = new CECSettingBool(KeyAdvancedMode, Resources.global_advanced_mode, false,
-                                                      _changedHandler) {Enabled = false};
-          Load(setting);
+                                                      _changedHandler)
+          { Enabled = false };
           _settings[KeyAdvancedMode] = setting;
+          setting.Load();
+          setting.SettingChanged += OnSettingChanged;
         }
         return _settings[KeyAdvancedMode].AsSettingBool;
       }
     }
 
-    public CECSettingUShort PhysicalAddress
-    {
-      get
-      {
+    public CECSettingUShort PhysicalAddress {
+      get {
         if (!_settings.ContainsKey(KeyPhysicalAddress))
         {
           CECSettingUShort setting = new CECSettingUShort(KeyPhysicalAddress, Resources.global_physical_address, 0xFFFF, _changedHandler) { Enabled = false, EnableSetting = EnablePhysicalAddressSetting };
-          Load(setting);
           _settings[KeyPhysicalAddress] = setting;
+          setting.StoreInRegistry = false; // use eeprom value
+          setting.SettingChanged += OnSettingChanged;
         }
         return _settings[KeyPhysicalAddress].AsSettingUShort;
       }
     }
 
-    public CECSettingBool OverridePhysicalAddress
-    {
-      get
-      {
-        if (!_settings.ContainsKey(KeyAdvancedMode))
+    public CECSettingBool DetectPhysicalAddress {
+      get {
+        if (!_settings.ContainsKey(KeyDetectPhysicalAddress))
+        {
+          CECSettingBool setting = new CECSettingBool(KeyDetectPhysicalAddress,
+                                                      Resources.global_detect_physical_address, true, _changedHandler)
+          {
+            EnableSetting = EnableDetectAddressSetting
+          };
+          _settings[KeyDetectPhysicalAddress] = setting;
+          setting.StoreInRegistry = false; // use libCEC's value
+          setting.SettingChanged += OnSettingChanged;
+        }
+        return _settings[KeyDetectPhysicalAddress].AsSettingBool;
+      }
+    }
+
+    public CECSettingBool OverridePhysicalAddress {
+      get {
+        if (!_settings.ContainsKey(KeyOverridePhysicalAddress))
         {
           CECSettingBool setting = new CECSettingBool(KeyOverridePhysicalAddress,
                                                       Resources.global_override_physical_address, false, _changedHandler);
-          Load(setting);
           _settings[KeyOverridePhysicalAddress] = setting;
+          setting.Load();
+          setting.SettingChanged += OnSettingChanged;
         }
         return _settings[KeyOverridePhysicalAddress].AsSettingBool;
       }
     }
 
-    public CECSettingDeviceType DeviceType
-    {
-      get
-      {
+    public CECSettingDeviceType DeviceType {
+      get {
         if (!_settings.ContainsKey(KeyDeviceType))
         {
           CecDeviceTypeList allowedTypes = new CecDeviceTypeList();
@@ -262,49 +246,48 @@ namespace LibCECTray.settings
           allowedTypes.Types[(int)CecDeviceType.PlaybackDevice] = CecDeviceType.PlaybackDevice;
 
           CECSettingDeviceType setting = new CECSettingDeviceType(KeyDeviceType, Resources.global_device_type,
-                                                                  CecDeviceType.RecordingDevice, _changedHandler) { Enabled = false, AllowedTypeMask = allowedTypes };
-          Load(setting);
+                                                                  CecDeviceType.RecordingDevice, _changedHandler)
+          { Enabled = false, AllowedTypeMask = allowedTypes };
           _settings[KeyDeviceType] = setting;
+          setting.StoreInRegistry = false; // use eeprom value
+          setting.SettingChanged += OnSettingChanged;
         }
         return _settings[KeyDeviceType].AsSettingDeviceType;
       }
     }
 
-    public CECSettingVendorId TVVendor
-    {
-      get
-      {
+    public CECSettingVendorId TVVendor {
+      get {
         if (!_settings.ContainsKey(KeyTVVendor))
         {
           CECSettingVendorId setting = new CECSettingVendorId(KeyTVVendor, Resources.global_tv_vendor,
                                                               CecVendorId.Unknown, _changedHandler)
-                                         {Enabled = false, EnableSetting = EnableSettingTVVendor};
-          Load(setting);
+          { Enabled = false, EnableSetting = EnableSettingTVVendor };
           _settings[KeyTVVendor] = setting;
+          setting.Load();
+          setting.SettingChanged += OnSettingChanged;
         }
         return _settings[KeyTVVendor].AsSettingVendorId;
       }
     }
 
-    public CECSettingBool OverrideTVVendor
-    {
-      get
-      {
+    public CECSettingBool OverrideTVVendor {
+      get {
         if (!_settings.ContainsKey(KeyOverrideTVVendor))
         {
           CECSettingBool setting = new CECSettingBool(KeyOverrideTVVendor, Resources.global_override_tv_vendor, false,
-                                                      _changedHandler) {Enabled = false};
-          Load(setting);
+                                                      _changedHandler)
+          { Enabled = false };
           _settings[KeyOverrideTVVendor] = setting;
+          setting.Load();
+          setting.SettingChanged += OnSettingChanged;
         }
         return _settings[KeyOverrideTVVendor].AsSettingBool;
       }
     }
 
-    public CECSettingLogicalAddresses WakeDevices
-    {
-      get
-      {
+    public CECSettingLogicalAddresses WakeDevices {
+      get {
         if (!_settings.ContainsKey(KeyWakeDevices))
         {
           CecLogicalAddresses defaultDeviceList = new CecLogicalAddresses();
@@ -312,18 +295,17 @@ namespace LibCECTray.settings
           CECSettingLogicalAddresses setting = new CECSettingLogicalAddresses(KeyWakeDevices,
                                                                               Resources.global_wake_devices,
                                                                               defaultDeviceList, _changedHandler)
-                                                 {Enabled = false};
-          Load(setting);
+          { Enabled = false };
           _settings[KeyWakeDevices] = setting;
+          setting.Load();
+          setting.SettingChanged += OnSettingChanged;
         }
         return _settings[KeyWakeDevices].AsSettingLogicalAddresses;
       }
     }
 
-    public CECSettingLogicalAddresses PowerOffDevices
-    {
-      get
-      {
+    public CECSettingLogicalAddresses PowerOffDevices {
+      get {
         if (!_settings.ContainsKey(KeyPowerOffDevices))
         {
           CecLogicalAddresses defaultDeviceList = new CecLogicalAddresses();
@@ -331,40 +313,67 @@ namespace LibCECTray.settings
           CECSettingLogicalAddresses setting = new CECSettingLogicalAddresses(KeyPowerOffDevices,
                                                                               Resources.global_standby_devices,
                                                                               defaultDeviceList,
-                                                                              _changedHandler) {Enabled = false};
-          Load(setting);
+                                                                              _changedHandler)
+          { Enabled = false };
           _settings[KeyPowerOffDevices] = setting;
+          setting.Load();
+          setting.SettingChanged += OnSettingChanged;
         }
         return _settings[KeyPowerOffDevices].AsSettingLogicalAddresses;
       }
     }
 
-    public CECSettingBool StartHidden
-    {
-      get
-      {
+    public CECSettingBool StartHidden {
+      get {
         if (!_settings.ContainsKey(KeyStartHidden))
         {
           CECSettingBool setting = new CECSettingBool(KeyStartHidden, Resources.global_start_hidden, false, _changedHandler);
-          Load(setting);
           _settings[KeyStartHidden] = setting;
+          setting.Load();
+          setting.SettingChanged += OnSettingChanged;
         }
         return _settings[KeyStartHidden].AsSettingBool;
       }
     }
 
-    public CECSettingBool StopTvStandby
-    {
-        get
+    public CECSettingBool StopTvStandby {
+      get {
+        if (!_settings.ContainsKey(KeyStopTvStandby))
         {
-            if (!_settings.ContainsKey(KeyStopTvStandby))
-            {
-                CECSettingBool setting = new CECSettingBool(KeyStopTvStandby, Resources.global_stop_tv_standby, true, _changedHandler);
-                Load(setting);
-                _settings[KeyStopTvStandby] = setting;
-            }
-            return _settings[KeyStopTvStandby].AsSettingBool;
+          CECSettingBool setting = new CECSettingBool(KeyStopTvStandby, Resources.global_stop_tv_standby, true, _changedHandler);
+          _settings[KeyStopTvStandby] = setting;
+          setting.Load();
+          setting.SettingChanged += OnSettingChanged;
+
         }
+        return _settings[KeyStopTvStandby].AsSettingBool;
+      }
+    }
+
+    public CECSettingBool TVAutoPowerOn {
+      get {
+        if (!_settings.ContainsKey(KeyTVAutoPowerOn))
+        {
+          CECSettingBool setting = new CECSettingBool(KeyTVAutoPowerOn, Resources.global_tv_auto_power_on, true, _changedHandler);
+          _settings[KeyTVAutoPowerOn] = setting;
+          setting.StoreInRegistry = false; // use eeprom value
+          setting.SettingChanged += OnSettingChanged;
+        }
+        return _settings[KeyTVAutoPowerOn].AsSettingBool;
+      }
+    }
+
+    public CECSettingIdleTime StandbyScreen {
+      get {
+        if (!_settings.ContainsKey(KeyStandbyScreen))
+        {
+          CECSettingIdleTime setting = new CECSettingIdleTime(KeyStandbyScreen, Resources.global_standby_screen, TimeoutSetting.Setting.Disabled, _changedHandler);
+          _settings[KeyStandbyScreen] = setting;
+          setting.Load();
+          setting.SettingChanged += OnSettingChanged;
+        }
+        return _settings[KeyStandbyScreen].AsSettingIdleTime;
+      }
     }
     #endregion
 
@@ -417,48 +426,11 @@ namespace LibCECTray.settings
       set {_settings[key] = value; }
     }
 
-    /// <summary>
-    /// Create the registry key that holds all settings.
-    /// </summary>
-    /// <returns>True when created (or already existing), false otherwise</returns>
-    private static bool CreateRegistryKey()
-    {
-      using (var regKey = Registry.CurrentUser.OpenSubKey("Software", true))
-      {
-        if (regKey != null)
-        {
-          regKey.CreateSubKey(RegistryCompanyName);
-          regKey.Close();
-        }
-        else
-        {
-          return false;
-        }
-      }
-      using (var regKey = Registry.CurrentUser.OpenSubKey("Software\\" + RegistryCompanyName, true))
-      {
-        if (regKey != null)
-        {
-          regKey.CreateSubKey(RegistryApplicationName);
-          regKey.Close();
-        }
-        else
-        {
-          return false;
-        }
-      }
-      return true;
-    }
-
     private readonly Dictionary<string, CECSetting> _settings = new Dictionary<string, CECSetting>();
-    private static string RegistryKeyName
-    {
-      get { return string.Format("Software\\{0}\\{1}", RegistryCompanyName, RegistryApplicationName); }
-    }
 
     private readonly CECSetting.SettingChangedHandler _changedHandler;
     public event CECSetting.SettingChangedHandler SettingChanged;
 
-    public static readonly string[] VendorNames = new string[15];
+    public static readonly string[] VendorNames = new string[15]; // one for every device on the bus
   }
 }

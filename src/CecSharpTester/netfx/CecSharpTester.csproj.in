@@ -29,7 +29,7 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>${LIBCEC_VERSION_MAJOR}.${LIBCEC_VERSION_MINOR}.${LIBCEC_VERSION_PATCH}.%2a</ApplicationVersion>
-    <ApplicationIcon>..\..\..\project\favicon.ico</ApplicationIcon>
+    <ApplicationIcon>..\..\..\project\p8_logo.ico</ApplicationIcon>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>

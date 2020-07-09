@@ -1,34 +1,37 @@
 ﻿/*
- * This file is part of the libCEC(R) library.
- *
- * libCEC(R) is Copyright (C) 2011-2013 Pulse-Eight Limited.  All rights reserved.
- * libCEC(R) is an original work, containing original code.
- *
- * libCEC(R) is a trademark of Pulse-Eight Limited.
- *
- * This program is dual-licensed; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- *
- * Alternatively, you can license this library under a commercial license,
- * please contact Pulse-Eight Licensing for more information.
- *
- * For more information contact:
- * Pulse-Eight Licensing       <license@pulse-eight.com>
- *     http://www.pulse-eight.com/
- *     http://www.pulse-eight.net/
- */
+* This file is part of the libCEC(R) library.
+*
+* libCEC(R) is Copyright (C) 2011-2020 Pulse-Eight Limited.  All rights reserved.
+* libCEC(R) is an original work, containing original code.
+*
+* libCEC(R) is a trademark of Pulse-Eight Limited.
+*
+* This program is dual-licensed; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*
+*
+* Alternatively, you can license this library under a commercial license,
+* please contact Pulse-Eight Licensing for more information.
+*
+* For more information contact:
+* Pulse-Eight Licensing       <license@pulse-eight.com>
+*     http://www.pulse-eight.com/
+*     http://www.pulse-eight.net/
+*
+* Author: Lars Op den Kamp <lars@opdenkamp.eu>
+*
+*/
 
 using System;
 using CecSharp;
@@ -38,6 +41,9 @@ namespace LibCECTray.controller.actions
   internal enum UpdateEventType
   {
     ProcessCompleted,
+    RegisterWarning,
+    ClearWarning,
+    StatusReady,
     StatusText,
     ProgressBar,
     TVVendorId,
@@ -78,6 +84,12 @@ namespace LibCECTray.controller.actions
       StringValue = value;
     }
 
+    public UpdateEvent(UpdateEventType type, CecAlert warning)
+    {
+      Type = type;
+      AlertValue = warning;
+    }
+
     public UpdateEvent(LibCECConfiguration config)
     {
       Type = UpdateEventType.Configuration;
@@ -87,7 +99,8 @@ namespace LibCECTray.controller.actions
     public UpdateEventType Type;
     public bool BoolValue;
     public int IntValue = -1;
-    public string StringValue = String.Empty;
+    public string StringValue = string.Empty;
+    public CecAlert AlertValue;
     public LibCECConfiguration ConfigValue;
   }
 
@@ -95,32 +108,37 @@ namespace LibCECTray.controller.actions
   {
     public void SendEvent(UpdateEventType type)
     {
-      if (EventHandler != null)
-        EventHandler(this, new UpdateEvent(type));
+      EventHandler?.Invoke(this, new UpdateEvent(type));
     }
 
     public void SendEvent(UpdateEventType type, bool value)
     {
-      if (EventHandler != null)
-        EventHandler(this, new UpdateEvent(type, value));
+      EventHandler?.Invoke(this, new UpdateEvent(type, value));
     }
 
     public void SendEvent(UpdateEventType type, int value)
     {
-      if (EventHandler != null)
-        EventHandler(this, new UpdateEvent(type, value));
+      EventHandler?.Invoke(this, new UpdateEvent(type, value));
     }
 
     public void SendEvent(UpdateEventType type, string value)
     {
-      if (EventHandler != null)
-        EventHandler(this, new UpdateEvent(type, value));
+      EventHandler?.Invoke(this, new UpdateEvent(type, value));
+    }
+
+    public void RegisterWarning(CecAlert warning)
+    {
+      EventHandler?.Invoke(this, new UpdateEvent(UpdateEventType.RegisterWarning, warning));
+    }
+
+    public void ClearWarning(CecAlert warning)
+    {
+      EventHandler?.Invoke(this, new UpdateEvent(UpdateEventType.ClearWarning, warning));
     }
 
     public void SendEvent(LibCECConfiguration config)
     {
-      if (EventHandler != null)
-        EventHandler(this, new UpdateEvent(config));
+      EventHandler?.Invoke(this, new UpdateEvent(config));
     }
 
     public void Run()

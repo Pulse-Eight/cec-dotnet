@@ -100,6 +100,8 @@ namespace LibCECTray.settings
       }
       set
       {
+        if ((int)base.Value == value)
+          return;
         base.Value = value;
         ComboBox control = BaseValueControl as ComboBox;
         if (Form != null && control != null && BaseItems.Contains(value))
@@ -125,12 +127,7 @@ namespace LibCECTray.settings
 
     public int UpperLimit { get; set; }
 
-    public int Step
-    {
-      get { return _step; }
-      set { _step = value; }
-    }
-    private int _step = 1;
+    public int Step { get; set; } = 1;
 
     protected virtual bool AllowedValue(int value)
     {
@@ -205,7 +202,7 @@ namespace LibCECTray.settings
 
     public override bool Enabled
     {
-      set { base.Enabled = (SettingType == CECSettingType.Bool || BaseItems.Count > 1) && value; }
+      set { base.Enabled = (SettingType == CECSettingType.Bool || (BaseItems != null && BaseItems.Count > 1 && value)); }
       get { return base.Enabled; }
     }
 

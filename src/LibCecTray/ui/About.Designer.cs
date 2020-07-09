@@ -37,16 +37,16 @@
       // label1
       // 
       this.label1.AutoSize = true;
-      this.label1.Location = new System.Drawing.Point(13, 13);
+      this.label1.Location = new System.Drawing.Point(12, 32);
       this.label1.Name = "label1";
-      this.label1.Size = new System.Drawing.Size(366, 117);
+      this.label1.Size = new System.Drawing.Size(366, 260);
       this.label1.TabIndex = 0;
       this.label1.Text = resources.GetString("label1.Text");
       // 
       // lVersionInfo
       // 
       this.lVersionInfo.AutoSize = true;
-      this.lVersionInfo.Location = new System.Drawing.Point(16, 150);
+      this.lVersionInfo.Location = new System.Drawing.Point(12, 9);
       this.lVersionInfo.Name = "lVersionInfo";
       this.lVersionInfo.Size = new System.Drawing.Size(101, 13);
       this.lVersionInfo.TabIndex = 1;
@@ -55,7 +55,7 @@
       // lBuildInfo
       // 
       this.lBuildInfo.AutoSize = true;
-      this.lBuildInfo.Location = new System.Drawing.Point(16, 173);
+      this.lBuildInfo.Location = new System.Drawing.Point(12, 305);
       this.lBuildInfo.Name = "lBuildInfo";
       this.lBuildInfo.Size = new System.Drawing.Size(89, 13);
       this.lBuildInfo.TabIndex = 2;
@@ -65,7 +65,7 @@
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(464, 212);
+      this.ClientSize = new System.Drawing.Size(482, 327);
       this.Controls.Add(this.lBuildInfo);
       this.Controls.Add(this.lVersionInfo);
       this.Controls.Add(this.label1);

@@ -1,34 +1,37 @@
 ﻿/*
- * This file is part of the libCEC(R) library.
- *
- * libCEC(R) is Copyright (C) 2011-2013 Pulse-Eight Limited.  All rights reserved.
- * libCEC(R) is an original work, containing original code.
- *
- * libCEC(R) is a trademark of Pulse-Eight Limited.
- *
- * This program is dual-licensed; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- *
- * Alternatively, you can license this library under a commercial license,
- * please contact Pulse-Eight Licensing for more information.
- *
- * For more information contact:
- * Pulse-Eight Licensing       <license@pulse-eight.com>
- *     http://www.pulse-eight.com/
- *     http://www.pulse-eight.net/
- */
+* This file is part of the libCEC(R) library.
+*
+* libCEC(R) is Copyright (C) 2011-2020 Pulse-Eight Limited.  All rights reserved.
+* libCEC(R) is an original work, containing original code.
+*
+* libCEC(R) is a trademark of Pulse-Eight Limited.
+*
+* This program is dual-licensed; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*
+*
+* Alternatively, you can license this library under a commercial license,
+* please contact Pulse-Eight Licensing for more information.
+*
+* For more information contact:
+* Pulse-Eight Licensing       <license@pulse-eight.com>
+*     http://www.pulse-eight.com/
+*     http://www.pulse-eight.net/
+*
+* Author: Lars Op den Kamp <lars@opdenkamp.eu>
+*
+*/
 
 using System.Drawing;
 using LibCECTray.ui;
@@ -59,7 +62,7 @@ namespace LibCECTray.settings
   }
 
   /// <summary>
-  /// Base class for settings that can be persisted in the registry
+  /// Base class for settings that can be saved in the registry
   /// </summary>
   abstract class CECSetting
   {
@@ -123,21 +126,76 @@ namespace LibCECTray.settings
     /// <summary>
     /// Load the value from the registry
     /// </summary>
-    /// <param name="key">The registry key to read the value from</param>
-    public void Load(RegistryKey key)
+    public void Load()
     {
-      _value = key.GetValue(KeyName) ?? DefaultValue;
-      Changed = false;
+      if (!StoreInRegistry)
+      {
+        return;
+      }
+      using (var key = Registry.CurrentUser.OpenSubKey(RegistryKeyName, true))
+      {
+        if (key != null)
+        {
+          _value = key.GetValue(KeyName) ?? DefaultValue;
+          Changed = false;
+        }
+        key.Close();
+      }
+    }
+
+    public bool Save()
+    {
+      if (!StoreInRegistry)
+      {
+        return true;
+      }
+      if (!CreateRegistryKey())
+      {
+        return false;
+      }
+      using (var key = Registry.CurrentUser.OpenSubKey(RegistryKeyName, true))
+      {
+        if (key != null)
+        {
+          key.SetValue(KeyName, _value);
+          Changed = false;
+        }
+        key.Close();
+      }
+      return true;
     }
 
     /// <summary>
-    /// Persist the value in the registry
+    /// Create the registry key that holds all settings.
     /// </summary>
-    /// <param name="key">The registry key to save the value to</param>
-    public void Persist(RegistryKey key)
+    /// <returns>True when created (or already existing), false otherwise</returns>
+    private static bool CreateRegistryKey()
     {
-      if (_value != DefaultValue)
-        key.SetValue(KeyName, _value);
+      using (var regKey = Registry.CurrentUser.OpenSubKey("Software", true))
+      {
+        if (regKey != null)
+        {
+          regKey.CreateSubKey(RegistryCompanyName);
+          regKey.Close();
+        }
+        else
+        {
+          return false;
+        }
+      }
+      using (var regKey = Registry.CurrentUser.OpenSubKey("Software\\" + CECSetting.RegistryCompanyName, true))
+      {
+        if (regKey != null)
+        {
+          regKey.CreateSubKey(RegistryApplicationName);
+          regKey.Close();
+        }
+        else
+        {
+          return false;
+        }
+      }
+      return true;
     }
     #endregion
 
@@ -236,6 +294,9 @@ namespace LibCECTray.settings
     {
       get { return this as CECSettingNumeric; }
     }
+    public CECSettingIdleTime AsSettingIdleTime {
+      get { return this as CECSettingIdleTime; }
+    }
     public CECSettingString AsSettingString
     {
       get { return this as CECSettingString; }
@@ -251,6 +312,8 @@ namespace LibCECTray.settings
     #endregion
 
     #region Members
+    public bool StoreInRegistry = true;
+
     /// <summary>
     /// Name of the key in the registry
     /// </summary>
@@ -328,6 +391,12 @@ namespace LibCECTray.settings
     }
     private Label _label;
 
+    private const string RegistryCompanyName = "Pulse-Eight";
+    private const string RegistryApplicationName = "libCECTray";
+    private static string RegistryKeyName {
+      get { return string.Format("Software\\{0}\\{1}", RegistryCompanyName, RegistryApplicationName); }
+    }
+
     /// <summary>
     /// Setting changed
     /// </summary>
@@ -341,10 +410,7 @@ namespace LibCECTray.settings
     /// <summary>
     /// The initial enabled state
     /// </summary>
-    protected bool InitialEnabledValue
-    {
-      get { return _enabled; }
-    }
+    protected bool InitialEnabledValue { get; private set; } = true;
 
     /// <summary>
     /// The enabled state of the gui control
@@ -357,13 +423,13 @@ namespace LibCECTray.settings
         if (EnableSetting != null)
           newValue = EnableSetting(this, value);
 
-        _enabled = newValue;
-        if (Form != null)
+        InitialEnabledValue = newValue;
+        if (Form != null && ValueControl != null)
           Form.SetControlEnabled(ValueControl, newValue);
       }
       get
       {
-        return ValueControl != null ? ValueControl.Enabled : _enabled;
+        return ValueControl != null ? ValueControl.Enabled : InitialEnabledValue;
       }
     }
 
@@ -371,8 +437,6 @@ namespace LibCECTray.settings
     /// The for that contains the gui controls
     /// </summary>
     protected IAsyncControls Form;
-
-    private bool _enabled = true;
     #endregion
   }
 }

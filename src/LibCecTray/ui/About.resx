@@ -112,13 +112,13 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="label1.Text" xml:space="preserve">
-    <value>libCEC(R) is Copyright (C) 2011-2013 Pulse-Eight Limited.  All rights reserved.
+    <value>libCEC(R) is Copyright (C) 2011-2020 Pulse-Eight Limited.  All rights reserved.
 libCEC(R) is an original work, containing original code.
 
 libCEC(R) is a trademark of Pulse-Eight Limited.
@@ -126,6 +126,17 @@ libCEC(R) is a trademark of Pulse-Eight Limited.
 This program is dual-licensed; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.</value>
+(at your option) any later version.
+
+Alternatively, you can license this library under a commercial license,
+please contact Pulse-Eight Licensing for more information.
+
+For more information contact:
+Pulse-Eight Licensing       &lt;license@pulse-eight.com&gt;
+    http://www.pulse-eight.com/
+    http://www.pulse-eight.net/
+
+Author: Lars Op den Kamp &lt;lars@opdenkamp.eu&gt;
+Icons: https://material.io/</value>
   </data>
 </root>
