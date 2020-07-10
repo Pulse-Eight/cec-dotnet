@@ -139,7 +139,6 @@ namespace LibCECTray.settings
           _value = key.GetValue(KeyName) ?? DefaultValue;
           Changed = false;
         }
-        key.Close();
       }
     }
 
