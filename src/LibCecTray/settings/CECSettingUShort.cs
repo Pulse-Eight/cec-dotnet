@@ -48,6 +48,11 @@ namespace LibCECTray.settings
     {
     }
 
+    public override void UpdateUI()
+    {
+      Form?.SetControlText(ValueControl, base.Value);
+    }
+
     public new ushort Value
     {
       get
@@ -61,8 +66,7 @@ namespace LibCECTray.settings
         var nval = string.Format("{0,4:X}", value);
         if (base.Value == nval) return;
         base.Value = nval;
-        if (Form != null)
-          Form.SetControlText(ValueControl, base.Value);
+        UpdateUI();
       }
     }
 

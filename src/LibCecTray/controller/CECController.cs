@@ -544,6 +544,8 @@ namespace LibCECTray.controller
       _gui.SetControlVisible(Settings.TVAutoPowerOn.ValueControl, (Config.FirmwareVersion >= 9));
 
       CECActions.UpdatePhysicalAddress();
+
+      Settings.UpdateUI();
       return 1;
     }
 

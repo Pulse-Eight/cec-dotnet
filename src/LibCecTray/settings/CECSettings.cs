@@ -382,6 +382,14 @@ namespace LibCECTray.settings
       return _settings.ContainsKey(key);
     }
 
+    public void UpdateUI()
+    {
+      foreach (var setting in _settings)
+      {
+        setting.Value.UpdateUI();
+      }
+    }
+
     public void SetVendorName(CecLogicalAddress address, CecVendorId vendorId, string vendorName)
     {
       VendorNames[(int)address] = vendorName;

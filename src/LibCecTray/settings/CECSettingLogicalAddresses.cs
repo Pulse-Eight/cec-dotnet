@@ -88,6 +88,11 @@ namespace LibCECTray.settings
       return retVal;
     }
 
+    public override void UpdateUI()
+    {
+      updateSelection(Value);
+    }
+
     public new CecLogicalAddresses Value
     {
       get { return DeserialiseLogicalAddresses(base.Value); }
@@ -96,7 +101,6 @@ namespace LibCECTray.settings
         var seraddr = SerialiseLogicalAddresses(value);
         if (base.Value != seraddr)
         {
-          updateSelection(value);
           base.Value = SerialiseLogicalAddresses(value);
         }
       }

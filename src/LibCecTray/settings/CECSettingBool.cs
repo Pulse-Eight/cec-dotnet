@@ -48,6 +48,12 @@ namespace LibCECTray.settings
     {
     }
 
+    public override void UpdateUI()
+    {
+      if (BaseValueControl is CheckBox control && Form != null)
+        Form.SetCheckboxChecked(control, Value);
+    }
+
     public new bool Value
     {
       get { return base.Value == 1; }
@@ -57,8 +63,7 @@ namespace LibCECTray.settings
         if (base.Value != nval)
         {
           base.Value = nval;
-          if (BaseValueControl is CheckBox control && Form != null)
-            Form.SetCheckboxChecked(control, value);
+          UpdateUI();
         }
       }
     }

@@ -58,6 +58,26 @@ namespace LibCECTray.settings
         listControlConvertEventArgs.Value = FormatValue(iValue);
     }
 
+    public override void UpdateUI()
+    {
+      if (Form == null) return;
+      switch (Value)
+      {
+        case CecDeviceType.RecordingDevice:
+          Form.SetControlText(ValueControl, Resources.device_recorder);
+          break;
+        case CecDeviceType.PlaybackDevice:
+          Form.SetControlText(ValueControl, Resources.device_playbackdevice);
+          break;
+        case CecDeviceType.Tuner:
+          Form.SetControlText(ValueControl, Resources.device_tuner);
+          break;
+        default:
+          Form.SetControlText(ValueControl, Resources.device_recorder);
+          break;
+      }
+    }
+
     public new CecDeviceType Value
     {
       get { return base.Value >= (int)CecDeviceType.Tv && base.Value <= (int)CecDeviceType.AudioSystem ? (CecDeviceType)base.Value : CecDeviceType.Reserved; }
@@ -65,22 +85,7 @@ namespace LibCECTray.settings
       {
         if (Value == value) return;
         base.Value = (int)value;
-        if (Form == null) return;
-        switch (value)
-        {
-          case CecDeviceType.RecordingDevice:
-            Form.SetControlText(ValueControl, Resources.device_recorder);
-            break;
-          case CecDeviceType.PlaybackDevice:
-            Form.SetControlText(ValueControl, Resources.device_playbackdevice);
-            break;
-          case CecDeviceType.Tuner:
-            Form.SetControlText(ValueControl, Resources.device_tuner);
-            break;
-          default:
-            Form.SetControlText(ValueControl, Resources.device_recorder);
-            break;
-        }
+        UpdateUI();
       }
     }
 

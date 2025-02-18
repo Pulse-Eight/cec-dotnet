@@ -68,6 +68,14 @@ namespace LibCECTray.settings
     {
     }
 
+    public override void UpdateUI()
+    {
+      if (Form != null && BaseValueControl is ComboBox control && BaseItems.Contains(Value))
+      {
+        Form.SetSelectedIndex(control, BaseItems.IndexOf(Value));
+      }
+    }
+
     #region Serialisation methods
     protected override string GetSerialisedValue()
     {
@@ -103,11 +111,7 @@ namespace LibCECTray.settings
         if ((int)base.Value == value)
           return;
         base.Value = value;
-        ComboBox control = BaseValueControl as ComboBox;
-        if (Form != null && control != null && BaseItems.Contains(value))
-        {
-          Form.SetSelectedIndex(control, BaseItems.IndexOf(value));
-        }
+        UpdateUI();
       }
     }
 

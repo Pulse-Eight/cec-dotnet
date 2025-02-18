@@ -122,6 +122,8 @@ namespace LibCECTray.settings
       Value = DefaultValue;
     }
 
+    public abstract void UpdateUI();
+
     #region Read/Write the corresponding registry key
     /// <summary>
     /// Load the value from the registry

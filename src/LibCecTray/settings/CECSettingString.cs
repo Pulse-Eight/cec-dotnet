@@ -54,6 +54,12 @@ namespace LibCECTray.settings
     {
     }
 
+    public override void UpdateUI()
+    {
+      if (BaseValueControl != null && Form != null)
+        Form.SetControlText(BaseValueControl, Value);
+    }
+
     #region Serialisation methods
     protected override string GetSerialisedValue()
     {
