@@ -574,11 +574,9 @@ namespace LibCECTray.ui
     public void SetControlsEnabled(bool val)
     {
       //main tab
-      SetControlEnabled(bSaveConfig, val);
       SetControlEnabled(bReloadConfig, val);
 
       //power config tab
-      SetControlEnabled(bSaveConfig2, val);
       SetControlEnabled(bReloadConfig2, val);
 
       //tester tab

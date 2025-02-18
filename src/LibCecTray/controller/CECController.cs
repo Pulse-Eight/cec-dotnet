@@ -189,6 +189,8 @@ namespace LibCECTray.controller
           }
         }
       }
+
+      SaveSettings();
     }
 
     /// <summary>

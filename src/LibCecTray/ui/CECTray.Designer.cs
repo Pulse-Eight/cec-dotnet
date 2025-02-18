@@ -69,14 +69,12 @@
       this.cbVendorOverride = new System.Windows.Forms.CheckBox();
       this.lPlayerConfig = new System.Windows.Forms.Label();
       this.lAdapterConfig = new System.Windows.Forms.Label();
-      this.bSaveConfig = new System.Windows.Forms.Button();
       this.lDeviceType = new System.Windows.Forms.Label();
       this.lConnectedDevice = new System.Windows.Forms.Label();
       this.lPortNumber = new System.Windows.Forms.Label();
       this.tabPanel = new System.Windows.Forms.TabControl();
       this.powerTab = new System.Windows.Forms.TabPage();
       this.bReloadConfig2 = new System.Windows.Forms.Button();
-      this.bSaveConfig2 = new System.Windows.Forms.Button();
       this.cbTVAutoPowerOn = new System.Windows.Forms.CheckBox();
       this.pictureBox3 = new System.Windows.Forms.PictureBox();
       this.label2 = new System.Windows.Forms.Label();
@@ -500,7 +498,6 @@
       this.Configuration.Controls.Add(this.lPlayerConfig);
       this.Configuration.Controls.Add(this.lAdapterConfig);
       this.Configuration.Controls.Add(this.cbDeviceType);
-      this.Configuration.Controls.Add(this.bSaveConfig);
       this.Configuration.Controls.Add(this.cbPortNumber);
       this.Configuration.Controls.Add(this.tbPhysicalAddress);
       this.Configuration.Controls.Add(this.cbConnectedDevice);
@@ -614,7 +611,7 @@
       // bReloadConfig
       // 
       this.bReloadConfig.Enabled = false;
-      this.bReloadConfig.Location = new System.Drawing.Point(300, 315);
+      this.bReloadConfig.Location = new System.Drawing.Point(461, 315);
       this.bReloadConfig.Name = "bReloadConfig";
       this.bReloadConfig.Size = new System.Drawing.Size(125, 23);
       this.bReloadConfig.TabIndex = 30;
@@ -652,17 +649,6 @@
       this.lAdapterConfig.Size = new System.Drawing.Size(61, 24);
       this.lAdapterConfig.TabIndex = 15;
       this.lAdapterConfig.Text = "HDMI";
-      // 
-      // bSaveConfig
-      // 
-      this.bSaveConfig.Enabled = false;
-      this.bSaveConfig.Location = new System.Drawing.Point(165, 315);
-      this.bSaveConfig.Name = "bSaveConfig";
-      this.bSaveConfig.Size = new System.Drawing.Size(125, 23);
-      this.bSaveConfig.TabIndex = 12;
-      this.bSaveConfig.Text = "Save configuration";
-      this.bSaveConfig.UseVisualStyleBackColor = true;
-      this.bSaveConfig.Click += new System.EventHandler(this.BSaveClick);
       // 
       // lDeviceType
       // 
@@ -707,7 +693,6 @@
       // powerTab
       // 
       this.powerTab.Controls.Add(this.bReloadConfig2);
-      this.powerTab.Controls.Add(this.bSaveConfig2);
       this.powerTab.Controls.Add(this.cbTVAutoPowerOn);
       this.powerTab.Controls.Add(this.pictureBox3);
       this.powerTab.Controls.Add(this.label2);
@@ -733,24 +718,13 @@
       // bReloadConfig2
       // 
       this.bReloadConfig2.Enabled = false;
-      this.bReloadConfig2.Location = new System.Drawing.Point(300, 315);
+      this.bReloadConfig2.Location = new System.Drawing.Point(461, 315);
       this.bReloadConfig2.Name = "bReloadConfig2";
       this.bReloadConfig2.Size = new System.Drawing.Size(125, 23);
       this.bReloadConfig2.TabIndex = 51;
       this.bReloadConfig2.Text = "Reset configuration";
       this.bReloadConfig2.UseVisualStyleBackColor = true;
       this.bReloadConfig2.Click += new System.EventHandler(this.BReloadConfigClick);
-      // 
-      // bSaveConfig2
-      // 
-      this.bSaveConfig2.Enabled = false;
-      this.bSaveConfig2.Location = new System.Drawing.Point(165, 315);
-      this.bSaveConfig2.Name = "bSaveConfig2";
-      this.bSaveConfig2.Size = new System.Drawing.Size(125, 23);
-      this.bSaveConfig2.TabIndex = 50;
-      this.bSaveConfig2.Text = "Save configuration";
-      this.bSaveConfig2.UseVisualStyleBackColor = true;
-      this.bSaveConfig2.Click += new System.EventHandler(this.BSaveClick);
       // 
       // cbTVAutoPowerOn
       // 
@@ -1051,7 +1025,6 @@
     private System.Windows.Forms.Label lPlayerConfig;
     private System.Windows.Forms.Label lAdapterConfig;
     private System.Windows.Forms.ComboBox cbDeviceType;
-    private System.Windows.Forms.Button bSaveConfig;
     private System.Windows.Forms.ComboBox cbPortNumber;
     private System.Windows.Forms.TextBox tbPhysicalAddress;
     private System.Windows.Forms.ComboBox cbConnectedDevice;
@@ -1092,7 +1065,6 @@
     public System.Windows.Forms.PictureBox pbAlert;
     private System.Windows.Forms.CheckBox cbTVAutoPowerOn;
     private System.Windows.Forms.Button bReloadConfig2;
-    private System.Windows.Forms.Button bSaveConfig2;
     private System.Windows.Forms.CheckBox cbDetectAddress;
   }
 }
