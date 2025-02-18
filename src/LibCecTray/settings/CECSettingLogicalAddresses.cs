@@ -51,6 +51,13 @@ namespace LibCECTray.settings
     {
     }
 
+    private void updateSelection(CecLogicalAddresses value)
+    {
+      if (Form == null) return;
+      for (int iPtr = 0; iPtr < 15; iPtr++)
+        Form.SetCheckboxItemChecked(ValueControl, iPtr, value.IsSet((CecLogicalAddress)iPtr));
+    }
+
     private static int SerialiseLogicalAddresses(CecLogicalAddresses addresses)
     {
       var retVal = 0;
@@ -87,12 +94,11 @@ namespace LibCECTray.settings
       set
       {
         var seraddr = SerialiseLogicalAddresses(value);
-        if (base.Value == seraddr)
-          return;
-        base.Value = seraddr;
-        if (Form == null) return;
-        for (int iPtr = 0; iPtr < 15; iPtr++)
-          Form.SetCheckboxItemChecked(ValueControl, iPtr, value.IsSet((CecLogicalAddress) iPtr));
+        if (base.Value != seraddr)
+        {
+          updateSelection(value);
+          base.Value = SerialiseLogicalAddresses(value);
+        }
       }
     }
 
@@ -194,6 +200,7 @@ namespace LibCECTray.settings
       Form = form;
       ReplaceControl(controls, labelControl, Label);
       ReplaceControl(controls, valueControl, ValueControl);
+      updateSelection(Value);
     }
 
     public void ReplaceControls(IAsyncControls form, Control.ControlCollection controls, CheckedListBox valueControl)
