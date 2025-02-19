@@ -81,7 +81,7 @@ namespace LibCECTray.controller.actions
 
       SendEvent(UpdateEventType.ProgressBar, 20);
       SendEvent(UpdateEventType.StatusText, Resources.action_sending_power_on);
-      if (_config.WakeDevices.Addresses.Length > 0)
+      if ((_config.WakeDevices.Addresses.Length > 0) && (!_config.ActivateSource || (_config.WakeDevices.Addresses.Length > 1)))
         _lib.PowerOnDevices(CecLogicalAddress.Broadcast);
 
       if (_lib.IsActiveDevice(CecLogicalAddress.Tv))
@@ -103,8 +103,7 @@ namespace LibCECTray.controller.actions
         SendEvent(UpdateEventType.StatusText, Resources.action_detecting_avr_vendor);
         SendEvent(UpdateEventType.AVRVendorId, (int)_lib.GetDeviceVendorId(CecLogicalAddress.AudioSystem));
       }
-
-      if (_lib.IsActiveDevice(CecLogicalAddress.Tv)&& !_lib.GetDevicePowerStatus(CecLogicalAddress.Tv).Equals(CecPowerStatus.On))
+      if (_config.ActivateSource)
       {
         SendEvent(UpdateEventType.ProgressBar, 70);
         SendEvent(UpdateEventType.StatusText, Resources.action_activating_source);
