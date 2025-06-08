@@ -694,6 +694,44 @@ namespace LibCECTray.ui
   /// The tab pages in this application
   /// </summary>
   internal enum ConfigTab
+        private void button_RawCommand_Click(object sender, EventArgs e)
+        {
+            var hexCommand = textBox_RawCommand.Text;
+
+            Controller.CECActions.SendRawCommand(hexCommand);
+        }
+
+        private bool IsValidRawCommandFormat(string command)
+        {
+            // Accepts exactly 4 bytes in "xx:xx:xx:xx" (hex pairs separated by colon) format
+            if (string.IsNullOrWhiteSpace(command))
+                return false;
+
+            var parts = command.Split(':');
+            if (parts.Length != 4)
+                return false;
+
+            foreach (var part in parts)
+            {
+                if (part.Length != 2)
+                    return false;
+                for (int i = 0; i < 2; i++)
+                {
+                    char c = part[i];
+                    if (!((c >= '0' && c <= '9') ||
+                          (c >= 'a' && c <= 'f') ||
+                          (c >= 'A' && c <= 'F')))
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        private void textBox_RawCommand_TextChanged(object sender, EventArgs e)
+        {
+            button_RawCommand.Enabled = IsValidRawCommandFormat((string)textBox_RawCommand.Text);
+        }
+    }
   {
     Configuration,
     KeyConfiguration,

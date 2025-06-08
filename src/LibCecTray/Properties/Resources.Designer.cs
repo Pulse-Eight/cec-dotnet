@@ -77,7 +77,18 @@ namespace LibCECTray.Properties {
                 return ResourceManager.GetString("action_activating_source", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to send raw command.
+        /// </summary>
+        internal static string send_raw_command
+        {
+            get
+            {
+                return ResourceManager.GetString("send_raw_command", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Checking if {0} is present.
         /// </summary>

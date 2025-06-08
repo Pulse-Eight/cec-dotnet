@@ -174,6 +174,18 @@ namespace LibCECTray.controller
     /// <param name="address">The new device to which the adapter is connected</param>
     /// <param name="portnumber">The new HDMI port number</param>
     public void SetConnectedDevice(CecLogicalAddress address, int portnumber)
+        /// <summary>
+        /// Send a raw command to the adapter
+        /// </summary>
+        /// <param name="hexCommand"></param>
+        public void SendRawCommand(string hexCommand)
+        {
+            if (SuppressUpdates || _activeProcess != null) return;
+
+            _activeProcess = new SendRawCommand(_controller.Lib, hexCommand);
+            _activeProcess.EventHandler += ProcessEventHandler;
+            (new Thread(_activeProcess.Run)).Start();
+        }
     {
       if (SuppressUpdates || _activeProcess != null) return;
 
