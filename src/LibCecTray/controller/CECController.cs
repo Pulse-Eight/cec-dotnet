@@ -130,7 +130,7 @@ namespace LibCECTray.controller
       {
         if (setting is CECSettingDeviceType dtSetting)
         {
-          if (dtSetting.Value != Config.DeviceTypes.Types[0] && Settings.OverrideTVVendor.Value)
+          if (dtSetting.Value != Config.DeviceTypes.Types[0])
           {
             Config.DeviceTypes.Types[0] = dtSetting.Value;
             if (!_deviceChangeWarningDisplayed)
