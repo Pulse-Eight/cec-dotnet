@@ -133,7 +133,12 @@ namespace LibCECTray.controller
           if (dtSetting.Value != Config.DeviceTypes.Types[0])
           {
             Config.DeviceTypes.Types[0] = dtSetting.Value;
-            if (!_deviceChangeWarningDisplayed)
+            // only warn when the user changed the type interactively. programmatic
+            // updates - the configuration read back from the adapter, values imported
+            // from Kodi's config at startup, or vendor detection adjusting the allowed
+            // types - all run with SuppressUpdates set. Without this guard the dialog
+            // pops up on every launch even though the user changed nothing (#523).
+            if (!CECActions.SuppressUpdates && !_deviceChangeWarningDisplayed)
             {
               _deviceChangeWarningDisplayed = true;
               MessageBox.Show(Resources.device_type_changed, Resources.app_name, MessageBoxButtons.OK,
