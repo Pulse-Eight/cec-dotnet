@@ -234,6 +234,7 @@ namespace LibCECTray.ui
       settings.StopTvStandby.ReplaceControls(this, powerTab.Controls, cbStopTvStandby);
       settings.StandbyScreen.ReplaceControls(this, powerTab.Controls, lStandbyScreen, cbStandbyScreen);
       settings.TVAutoPowerOn.ReplaceControls(this, powerTab.Controls, cbTVAutoPowerOn);
+      settings.AutonomousMode.ReplaceControls(this, powerTab.Controls, cbAutonomousMode);
 
       var idleTimeSetting = settings.StandbyScreen.AsSettingIdleTime;
       var cbIdleTime = (idleTimeSetting.ValueControl as ComboBox);
@@ -244,6 +245,7 @@ namespace LibCECTray.ui
       if (idleTimeSetting.TimeoutEnabled)
         SetControlVisible(pbIdleTime, true);
       SetControlVisible(settings.TVAutoPowerOn.ValueControl, false);
+      SetControlVisible(settings.AutonomousMode.ValueControl, false);
     }
 
     private void BSaveClick(object sender, EventArgs e)

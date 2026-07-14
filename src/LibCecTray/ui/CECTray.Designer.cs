@@ -76,6 +76,7 @@
       this.powerTab = new System.Windows.Forms.TabPage();
       this.bReloadConfig2 = new System.Windows.Forms.Button();
       this.cbTVAutoPowerOn = new System.Windows.Forms.CheckBox();
+      this.cbAutonomousMode = new System.Windows.Forms.CheckBox();
       this.pictureBox3 = new System.Windows.Forms.PictureBox();
       this.label2 = new System.Windows.Forms.Label();
       this.pictureBox2 = new System.Windows.Forms.PictureBox();
@@ -694,6 +695,7 @@
       // 
       this.powerTab.Controls.Add(this.bReloadConfig2);
       this.powerTab.Controls.Add(this.cbTVAutoPowerOn);
+      this.powerTab.Controls.Add(this.cbAutonomousMode);
       this.powerTab.Controls.Add(this.pictureBox3);
       this.powerTab.Controls.Add(this.label2);
       this.powerTab.Controls.Add(this.pictureBox2);
@@ -736,9 +738,20 @@
       this.cbTVAutoPowerOn.TabIndex = 49;
       this.cbTVAutoPowerOn.Text = "global_tv_auto_power_on";
       this.cbTVAutoPowerOn.UseVisualStyleBackColor = true;
-      // 
+      //
+      // cbAutonomousMode
+      //
+      this.cbAutonomousMode.AutoSize = true;
+      this.cbAutonomousMode.Enabled = false;
+      this.cbAutonomousMode.Location = new System.Drawing.Point(282, 152);
+      this.cbAutonomousMode.Name = "cbAutonomousMode";
+      this.cbAutonomousMode.Size = new System.Drawing.Size(149, 17);
+      this.cbAutonomousMode.TabIndex = 52;
+      this.cbAutonomousMode.Text = "global_autonomous_mode";
+      this.cbAutonomousMode.UseVisualStyleBackColor = true;
+      //
       // pictureBox3
-      // 
+      //
       this.pictureBox3.BackgroundImage = global::LibCECTray.Properties.Resources.power;
       this.pictureBox3.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
       this.pictureBox3.Location = new System.Drawing.Point(6, 218);
@@ -1064,6 +1077,7 @@
     public System.Windows.Forms.Label lFirmware;
     public System.Windows.Forms.PictureBox pbAlert;
     private System.Windows.Forms.CheckBox cbTVAutoPowerOn;
+    private System.Windows.Forms.CheckBox cbAutonomousMode;
     private System.Windows.Forms.Button bReloadConfig2;
     private System.Windows.Forms.CheckBox cbDetectAddress;
   }

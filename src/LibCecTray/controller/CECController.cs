@@ -181,6 +181,11 @@ namespace LibCECTray.controller
         if (setting is CECSettingBool boolSetting)
           Config.AutoPowerOn = (boolSetting.Value ? BoolSetting.Enabled : BoolSetting.Disabled);
       }
+      else if (setting.KeyName == CECSettings.KeyAutonomousMode)
+      {
+        if (setting is CECSettingBool boolSetting)
+          Config.AutonomousMode = (boolSetting.Value ? BoolSetting.Enabled : BoolSetting.Disabled);
+      }
       else if (setting.KeyName == CECSettings.KeyDetectPhysicalAddress)
       {
         if (setting is CECSettingBool boolSetting)
@@ -517,6 +522,7 @@ namespace LibCECTray.controller
       Settings.ActivateSource.Value = Config.ActivateSource;
       Settings.DeviceType.Value = config.DeviceTypes.Types[0];
       Settings.TVAutoPowerOn.Value = (config.AutoPowerOn == BoolSetting.Enabled);
+      Settings.AutonomousMode.Value = (config.AutonomousMode == BoolSetting.Enabled);
 
       if (config.TvVendor != CecVendorId.Unknown)
       {
@@ -547,6 +553,7 @@ namespace LibCECTray.controller
         _gui.SetControlVisible(_gui.bFirmwareUpgrade, false);
       }
       _gui.SetControlVisible(Settings.TVAutoPowerOn.ValueControl, (Config.FirmwareVersion >= 9));
+      _gui.SetControlVisible(Settings.AutonomousMode.ValueControl, (Config.FirmwareVersion >= 2));
 
       CECActions.UpdatePhysicalAddress();
 

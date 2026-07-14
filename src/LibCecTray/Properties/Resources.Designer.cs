@@ -822,6 +822,15 @@ namespace LibCECTray.Properties {
                 return ResourceManager.GetString("global_tv_auto_power_on", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Allow the TV to wake this PC.
+        /// </summary>
+        internal static string global_autonomous_mode {
+            get {
+                return ResourceManager.GetString("global_autonomous_mode", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to TV vendor.
