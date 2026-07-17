@@ -178,7 +178,16 @@ namespace LibCECTray.ui
     {
       Controller.CECActions.SuppressUpdates = true;
       AsyncDisconnect dc = new AsyncDisconnect(Controller);
-      (new Thread(dc.Process)).Start();
+      Thread disconnect = new Thread(dc.Process);
+      disconnect.Start();
+
+      // the system suspends as soon as this returns, and standby is transmitted from
+      // the thread above, so it has to be given the time to do that: without this the
+      // tv keeps running whenever the suspend wins the race. windows only waits about
+      // two seconds for us before it suspends regardless, so don't wait for longer
+      // than that. the disconnect finishes on its own if it doesn't make it in time,
+      // which is what used to happen every time.
+      disconnect.Join(SuspendTimeoutMs);
     }
 
     private void OnExit()
@@ -362,7 +371,10 @@ namespace LibCECTray.ui
         UpdateLogCallback d = UpdateLog;
         try
         {
-          Invoke(d, new object[] { });
+          // BeginInvoke, not Invoke: this is called from a libCEC callback thread, and
+          // OnSleep() waits on that thread from the gui thread. Blocking here would
+          // deadlock the two until the suspend timeout expires.
+          BeginInvoke(d, new object[] { });
         }
         catch (Exception) { }
       }
@@ -620,6 +632,12 @@ namespace LibCECTray.ui
     private ConfigTab _selectedTab = ConfigTab.Configuration;
     private StringBuilder _log = new StringBuilder();
     private static readonly int MaxLogLength = 100 * 1024;
+
+    /// <summary>
+    /// The time to wait for standby to be transmitted and the connection to be closed
+    /// when the system suspends
+    /// </summary>
+    private const int SuspendTimeoutMs = 2000;
 
     private CECController _controller;
     public CECController Controller
