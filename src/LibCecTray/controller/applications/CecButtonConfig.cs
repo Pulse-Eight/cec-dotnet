@@ -58,7 +58,9 @@ namespace LibCECTray.controller.applications
       }
       set
       {
-        base.Value = value == null ? null : value.AsString();
+        // an empty input, not null: this is persisted as-is, and the registry can't
+        // store a null. it's what a button without a default value is created with too.
+        base.Value = value == null ? string.Empty : value.AsString();
       }
     }
 
