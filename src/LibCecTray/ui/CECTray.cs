@@ -167,7 +167,11 @@ namespace LibCECTray.ui
 
     private void OnWake()
     {
+      // Initialise() bails out once the controller has been initialised, which it has
+      // by the time the first resume gets here. Standby closed the connection, so it
+      // has to be reopened now that the system is back up.
       Controller.Initialise();
+      Controller.Open();
     }
 
     private void OnSleep()

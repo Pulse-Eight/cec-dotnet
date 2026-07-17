@@ -41,7 +41,6 @@ using LibCECTray.Properties;
 using LibCECTray.controller.applications;
 using LibCECTray.settings;
 using LibCECTray.ui;
-using Microsoft.Win32;
 using System.Threading;
 using System.Diagnostics;
 using System.IO;
@@ -255,11 +254,14 @@ namespace LibCECTray.controller
 
     public void Open()
     {
-      _lib.EnableCallbacks();
-      if (!_started)
+      lock (this)
       {
-        _started = true;
-        CECActions.ConnectToDevice(Config);
+        _lib.EnableCallbacks();
+        if (!_started)
+        {
+          _started = true;
+          CECActions.ConnectToDevice(Config);
+        }
       }
     }
 
@@ -281,22 +283,6 @@ namespace LibCECTray.controller
       {
         SetStatusText(Resources.ready);
         _gui.SetControlVisible(_gui.pbAlert, false);
-      }
-    }
-
-    private void PowerModeChanged(object sender, PowerModeChangedEventArgs e)
-    {
-      switch (e.Mode)
-      {
-        case PowerModes.Suspend:
-          _lib.DisableCallbacks();
-          break;
-        case PowerModes.Resume:
-          Close();
-          Open();
-          break;
-        default:
-          break;
       }
     }
 
@@ -409,7 +395,6 @@ namespace LibCECTray.controller
       foreach (var app in _applications)
         app.UiControl.SetEnabled(app.ProcessName != "");
       _gui.SetControlsEnabled(val);
-      SystemEvents.PowerModeChanged += new PowerModeChangedEventHandler(PowerModeChanged);
     }
 
     /// <summary>
@@ -451,17 +436,23 @@ namespace LibCECTray.controller
     #region Callbacks called by libCEC
     public override int ReceiveCommand(CecCommand command)
     {
-        if (command.Opcode == CecOpcode.Standby &&
-            (command.Destination == CecLogicalAddress.Broadcast || command.Destination == _lib.GetLogicalAddresses().Primary))
-        if (Settings.StopTvStandby.Value)
-        {
-            var key = new CecKeypress(CecUserControlCode.Stop, 0);
-            foreach (var app in _applications)
-                app.SendKey(key, false);
-            Lib.DisableCallbacks();
-            Application.SetSuspendState(PowerState.Suspend, false, false);
-        }
-        return 0;
+      if (command.Opcode == CecOpcode.Standby &&
+          (command.Destination == CecLogicalAddress.Broadcast || command.Destination == _lib.GetLogicalAddresses().Primary) &&
+          Settings.StopTvStandby.Value)
+      {
+        var key = new CecKeypress(CecUserControlCode.Stop, 0);
+        foreach (var app in _applications)
+          app.SendKey(key, false);
+
+        // SetSuspendState() only returns when the system resumes, so it can't be called
+        // from here: this runs on a libCEC callback thread, and Close() tears down the
+        // connection from the standby handler while we'd still be in it. It can't go on
+        // the gui thread either, or the message pump won't be there to receive
+        // WM_POWERBROADCAST and standby the tv. Suspend from a thread of its own, and
+        // let the PBT_APMSUSPEND handler do the rest.
+        (new Thread(() => Application.SetSuspendState(PowerState.Suspend, false, false))).Start();
+      }
+      return 0;
     }
 
     public override int ReceiveKeypress(CecKeypress key)
