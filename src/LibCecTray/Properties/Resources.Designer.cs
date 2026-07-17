@@ -831,7 +831,25 @@ namespace LibCECTray.Properties {
                 return ResourceManager.GetString("global_autonomous_mode", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Announce as.
+        /// </summary>
+        internal static string global_device_vendor_id {
+            get {
+                return ResourceManager.GetString("global_device_vendor_id", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to - default -.
+        /// </summary>
+        internal static string vendor_id_default {
+            get {
+                return ResourceManager.GetString("vendor_id_default", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to TV vendor.
         /// </summary>

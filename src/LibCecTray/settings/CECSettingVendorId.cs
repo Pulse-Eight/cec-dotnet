@@ -46,7 +46,14 @@ namespace LibCECTray.settings
   class CECSettingVendorId : CECSettingNumeric
   {
     public CECSettingVendorId(string keyName, string friendlyName, CecVendorId defaultValue, SettingChangedHandler changedHandler) :
-      base(CECSettingType.VendorId, keyName, friendlyName, (int)defaultValue, changedHandler, OnFormat, new List<int>
+      this(keyName, friendlyName, defaultValue, Resources.autodetect, changedHandler)
+    {
+    }
+
+    /// <param name="unknownName">how CecVendorId.Unknown is presented. it means 'autodetect' for
+    /// the vendor of another device, but 'use the default' for the vendor id of this one</param>
+    public CECSettingVendorId(string keyName, string friendlyName, CecVendorId defaultValue, string unknownName, SettingChangedHandler changedHandler) :
+      base(CECSettingType.VendorId, keyName, friendlyName, (int)defaultValue, changedHandler, null, new List<int>
                  {
                    (int) CecVendorId.Unknown,
                    (int) CecVendorId.Akai,
@@ -67,16 +74,18 @@ namespace LibCECTray.settings
                    (int) CecVendorId.Yamaha
                  })
     {
+      _unknownName = unknownName;
+      Format += OnFormat;
     }
 
-    private static void OnFormat(object sender, ListControlConvertEventArgs listControlConvertEventArgs)
+    private void OnFormat(object sender, ListControlConvertEventArgs listControlConvertEventArgs)
     {
       int iValue;
       if (int.TryParse((string)listControlConvertEventArgs.Value, out iValue))
         listControlConvertEventArgs.Value = FormatValue(iValue);
     }
 
-    private static string FormatValue(int value)
+    private string FormatValue(int value)
     {
       switch ((CecVendorId)value)
       {
@@ -113,7 +122,7 @@ namespace LibCECTray.settings
         case CecVendorId.Yamaha:
           return "Yamaha";
         default:
-          return Resources.autodetect;
+          return _unknownName;
       }
     }
 
@@ -131,6 +140,8 @@ namespace LibCECTray.settings
       get { return base.DefaultValue >= 0 && base.DefaultValue <= 0xFFFFFF ? (CecVendorId)base.DefaultValue : CecVendorId.Unknown; }
       set { base.DefaultValue = (int)value; }
     }
+
+    private readonly string _unknownName;
   }
 
 }
