@@ -139,6 +139,16 @@ namespace LibCECTray.ui
 
     protected override void SetVisibleCore(bool value)
     {
+      // Never force the handle to be created once the form is (being) disposed.
+      // When StartHidden is set the handle is never created, so a background
+      // thread that hides the form (e.g. after a process completes) reaches this
+      // with InvokeRequired == false and runs here directly. If the form has
+      // meanwhile been disposed - which happens when Kodi starts and the Kodi
+      // controller calls Application.Exit() - CreateHandle() throws an
+      // ObjectDisposedException that takes the whole process down.
+      if (IsDisposed || Disposing)
+        return;
+
       if (Controller.Settings.StartHidden.Value && !this.IsHandleCreated)
       {
         value = false;
