@@ -58,6 +58,7 @@ namespace LibCECTray.settings
     public static string KeySuspendOnSourceChange = "global_suspend_on_source_change";
     public static string KeyStandbyScreen = "global_standby_screen";
     public static string KeyTVAutoPowerOn = "global_tv_auto_power_on";
+    public static string KeyTVPowerOnWithActivity = "global_tv_power_on_with_activity";
     public static string KeyAutonomousMode = "global_autonomous_mode";
     public static string KeyDetectPhysicalAddress = "global_detect_physical_address";
     #endregion
@@ -394,6 +395,19 @@ namespace LibCECTray.settings
           setting.SettingChanged += OnSettingChanged;
         }
         return _settings[KeyTVAutoPowerOn].AsSettingBool;
+      }
+    }
+
+    public CECSettingBool TVPowerOnWithActivity {
+      get {
+        if (!_settings.ContainsKey(KeyTVPowerOnWithActivity))
+        {
+          CECSettingBool setting = new CECSettingBool(KeyTVPowerOnWithActivity, Resources.global_tv_power_on_with_activity, false, _changedHandler);
+          _settings[KeyTVPowerOnWithActivity] = setting;
+          setting.Load();
+          setting.SettingChanged += OnSettingChanged;
+        }
+        return _settings[KeyTVPowerOnWithActivity].AsSettingBool;
       }
     }
 

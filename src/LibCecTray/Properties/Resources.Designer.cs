@@ -833,6 +833,15 @@ namespace LibCECTray.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Power on the TV when the PC is no longer idle.
+        /// </summary>
+        internal static string global_tv_power_on_with_activity {
+            get {
+                return ResourceManager.GetString("global_tv_power_on_with_activity", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Allow the TV to wake this PC.
         /// </summary>
         internal static string global_autonomous_mode {

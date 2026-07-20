@@ -64,6 +64,7 @@ namespace LibCECTray.ui
       SystemIdleMonitor.Instance.ScreensaverActivated += ScreenSaverActivated;
       SystemIdleMonitor.Instance.PowerStatusChanged += SystemPowerChanged;
       SystemIdleMonitor.Instance.SystemActivity += SystemActivity;
+      SystemIdleMonitor.Instance.SystemActivityChanged += SystemActivityChanged;
       SystemIdleMonitor.Instance.SystemIdle += SystemIdle;
       SystemEvents.SessionEnding += new SessionEndingEventHandler(OnSessionEnding);
     }
@@ -82,6 +83,17 @@ namespace LibCECTray.ui
     private void SystemActivity(object sender, IdleTimeChange e)
     {
       SetIdleTime(e.IdleTimeSeconds, e.IdleTimeoutSeconds);
+    }
+
+    private void SystemActivityChanged(object sender, ActivityChange e)
+    {
+      // Power the tv back on when the user returns to the pc. Independent of the
+      // standby-on-idle timeout, and guarded by the tracked tv power state so it isn't
+      // resent on every brief pause. Useful with a tv that powers itself off as a monitor.
+      if (e.Active)
+      {
+        Controller.PowerOnTvForActivity();
+      }
     }
 
     private void SetIdleTime(int idleTimeSeconds, int idleTimeoutSeconds)
@@ -283,6 +295,7 @@ namespace LibCECTray.ui
       settings.SuspendOnSourceChange.ReplaceControls(this, powerTab.Controls, cbSuspendOnSourceChange);
       settings.StandbyScreen.ReplaceControls(this, powerTab.Controls, lStandbyScreen, cbStandbyScreen);
       settings.TVAutoPowerOn.ReplaceControls(this, powerTab.Controls, cbTVAutoPowerOn);
+      settings.TVPowerOnWithActivity.ReplaceControls(this, powerTab.Controls, cbTVPowerOnWithActivity);
       settings.AutonomousMode.ReplaceControls(this, powerTab.Controls, cbAutonomousMode);
 
       var idleTimeSetting = settings.StandbyScreen.AsSettingIdleTime;

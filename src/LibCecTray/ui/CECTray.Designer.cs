@@ -78,6 +78,7 @@
       this.powerTab = new System.Windows.Forms.TabPage();
       this.bReloadConfig2 = new System.Windows.Forms.Button();
       this.cbTVAutoPowerOn = new System.Windows.Forms.CheckBox();
+      this.cbTVPowerOnWithActivity = new System.Windows.Forms.CheckBox();
       this.cbAutonomousMode = new System.Windows.Forms.CheckBox();
       this.pictureBox3 = new System.Windows.Forms.PictureBox();
       this.label2 = new System.Windows.Forms.Label();
@@ -721,6 +722,7 @@
       // 
       this.powerTab.Controls.Add(this.bReloadConfig2);
       this.powerTab.Controls.Add(this.cbTVAutoPowerOn);
+      this.powerTab.Controls.Add(this.cbTVPowerOnWithActivity);
       this.powerTab.Controls.Add(this.cbAutonomousMode);
       this.powerTab.Controls.Add(this.pictureBox3);
       this.powerTab.Controls.Add(this.label2);
@@ -765,6 +767,17 @@
       this.cbTVAutoPowerOn.TabIndex = 49;
       this.cbTVAutoPowerOn.Text = "global_tv_auto_power_on";
       this.cbTVAutoPowerOn.UseVisualStyleBackColor = true;
+      //
+      // cbTVPowerOnWithActivity
+      //
+      this.cbTVPowerOnWithActivity.AutoSize = true;
+      this.cbTVPowerOnWithActivity.Enabled = false;
+      this.cbTVPowerOnWithActivity.Location = new System.Drawing.Point(40, 221);
+      this.cbTVPowerOnWithActivity.Name = "cbTVPowerOnWithActivity";
+      this.cbTVPowerOnWithActivity.Size = new System.Drawing.Size(241, 17);
+      this.cbTVPowerOnWithActivity.TabIndex = 53;
+      this.cbTVPowerOnWithActivity.Text = "global_tv_power_on_with_activity";
+      this.cbTVPowerOnWithActivity.UseVisualStyleBackColor = true;
       //
       // cbAutonomousMode
       //
@@ -1118,6 +1131,7 @@
     public System.Windows.Forms.Label lFirmware;
     public System.Windows.Forms.PictureBox pbAlert;
     private System.Windows.Forms.CheckBox cbTVAutoPowerOn;
+    private System.Windows.Forms.CheckBox cbTVPowerOnWithActivity;
     private System.Windows.Forms.CheckBox cbAutonomousMode;
     private System.Windows.Forms.Button bReloadConfig2;
     private System.Windows.Forms.CheckBox cbDetectAddress;

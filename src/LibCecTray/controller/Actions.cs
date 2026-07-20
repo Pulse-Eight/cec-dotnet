@@ -139,6 +139,8 @@ namespace LibCECTray.controller
             _controller.Hide(true);
           }
 
+          _controller.InitializationCompleted();
+
           break;
         case UpdateEventType.ExitApplication:
           SuppressUpdates = true;

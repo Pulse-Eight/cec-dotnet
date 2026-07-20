@@ -438,9 +438,49 @@ namespace LibCECTray.controller
     }
     #endregion
 
+    #region TV power state
+    /// <summary>
+    /// Seed the tracked tv power state once the connection is up, so 'power on the tv when
+    /// the pc is no longer idle' knows whether the tv still needs to be woken.
+    /// </summary>
+    public void InitializationCompleted()
+    {
+      CecPowerStatus status = Lib.GetDevicePowerStatus(CecLogicalAddress.Tv);
+      TvIsOn = status == CecPowerStatus.On || status == CecPowerStatus.InTransitionStandbyToOn;
+    }
+
+    /// <summary>
+    /// Power on the tv when the user returns to an idle pc, unless we believe it's already on.
+    /// </summary>
+    public void PowerOnTvForActivity()
+    {
+      if (TvIsOn || !Settings.TVPowerOnWithActivity.Value)
+        return;
+
+      CECActions.SendImageViewOn(CecLogicalAddress.Tv);
+      // assume the tv is on now; a Standby broadcast from the tv resets this if it powers off
+      TvIsOn = true;
+    }
+    #endregion
+
     #region Callbacks called by libCEC
     public override int ReceiveCommand(CecCommand command)
     {
+      // Track the tv's power state for the 'power on the tv when the pc is no longer idle'
+      // feature. ReportPowerStatus carries the actual state; a Standby from the tv means off.
+      if (command.Initiator == CecLogicalAddress.Tv)
+      {
+        if (command.Opcode == CecOpcode.Standby)
+        {
+          TvIsOn = false;
+        }
+        else if (command.Opcode == CecOpcode.ReportPowerStatus && command.Parameters.Size > 0)
+        {
+          CecPowerStatus status = (CecPowerStatus)command.Parameters.Data[0];
+          TvIsOn = status == CecPowerStatus.On || status == CecPowerStatus.InTransitionStandbyToOn;
+        }
+      }
+
       if (command.Opcode == CecOpcode.Standby &&
           (command.Destination == CecLogicalAddress.Broadcast || command.Destination == _lib.GetLogicalAddresses().Primary) &&
           Settings.StopTvStandby.Value)
@@ -733,6 +773,16 @@ namespace LibCECTray.controller
       }
     }
     private LibCECConfiguration _config;
+
+    /// <summary>
+    /// Our best guess of whether the TV is currently powered on, tracked from the
+    /// commands it sends. Used by the 'power on the tv when the pc is no longer idle' feature.
+    /// </summary>
+    public bool TvIsOn
+    {
+      get;
+      private set;
+    }
 
     /// <summary>
     /// Get build info from libCEC

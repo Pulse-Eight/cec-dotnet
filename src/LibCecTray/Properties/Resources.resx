@@ -666,6 +666,9 @@ CEC will not work (properly) if the TV does not support CEC, or has CEC disabled
   <data name="global_tv_auto_power_on" xml:space="preserve">
     <value>Power on the TV when the PC starts</value>
   </data>
+  <data name="global_tv_power_on_with_activity" xml:space="preserve">
+    <value>Power on the TV when the PC is no longer idle</value>
+  </data>
   <data name="global_autonomous_mode" xml:space="preserve">
     <value>Allow the TV to wake this PC</value>
   </data>

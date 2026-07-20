@@ -151,6 +151,15 @@ namespace LibCECTray.controller
     {
       int lastIdleTimeSeconds = IdleTimeSeconds;
       IdleTimeSeconds = WindowsAPI.SystemIdleSeconds();
+
+      // Raw idle/active transition (any input after >= 1s of no input). Tracked separately
+      // from the standby-on-idle timeout below, so the tv can be powered back on when the
+      // user returns even when standby-on-idle is disabled (IdleTimeoutSeconds <= 0).
+      bool lastIsIdle = IsIdle;
+      IsIdle = IdleTimeSeconds > 0;
+      if (IsIdle != lastIsIdle)
+        SystemActivityChanged?.Invoke(this, new ActivityChange(!IsIdle));
+
       if (IdleTimeoutSeconds <= 0)
       {
         return;
@@ -174,6 +183,15 @@ namespace LibCECTray.controller
     /// Idle time in seconds
     /// </summary>
     public int IdleTimeSeconds {
+      get;
+      private set;
+    }
+
+    /// <summary>
+    /// True while the system is idle (no user input for at least a second),
+    /// regardless of the standby-on-idle timeout.
+    /// </summary>
+    public bool IsIdle {
       get;
       private set;
     }
@@ -204,6 +222,7 @@ namespace LibCECTray.controller
     }
 
     public event EventHandler<IdleChange> SystemIdle;
+    public event EventHandler<ActivityChange> SystemActivityChanged;
     public event EventHandler<IdleTimeChange> SystemActivity;
     public event EventHandler<ScreensaverChange> ScreensaverActivated;
     public event EventHandler<SystemPowerChange> PowerStatusChanged;
@@ -243,6 +262,22 @@ namespace LibCECTray.controller
     }
 
     public bool Active { private set; get; }
+  }
+
+  public class ActivityChange : EventArgs
+  {
+    public ActivityChange(bool active)
+    {
+      Active = active;
+    }
+
+    /// <summary>
+    /// True when the system just became active, false when it just became idle.
+    /// </summary>
+    public bool Active {
+      get;
+      private set;
+    }
   }
 
   public class IdleChange : EventArgs
