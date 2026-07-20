@@ -175,6 +175,30 @@ namespace LibCECTray.ui
       }
     }
 
+    protected override void OnHandleCreated(EventArgs e)
+    {
+      base.OnHandleCreated(e);
+
+      // away mode is delivered as a WM_POWERBROADCAST/PBT_POWERSETTINGCHANGE, which windows
+      // only sends to windows that registered for it. without this the AwayEnter/AwayExit
+      // handling in SystemIdleMonitor never fires. StartHidden still creates the handle, so
+      // this runs even when the window is never shown.
+      if (_awayModeNotification == IntPtr.Zero)
+        _awayModeNotification = WindowsAPI.RegisterPowerSettingNotification(Handle,
+          ref WindowsAPI.GUID_SYSTEM_AWAYMODE, WindowsAPI.DEVICE_NOTIFY_WINDOW_HANDLE);
+    }
+
+    protected override void OnHandleDestroyed(EventArgs e)
+    {
+      if (_awayModeNotification != IntPtr.Zero)
+      {
+        WindowsAPI.UnregisterPowerSettingNotification(_awayModeNotification);
+        _awayModeNotification = IntPtr.Zero;
+      }
+
+      base.OnHandleDestroyed(e);
+    }
+
     private void OnWake()
     {
       // Initialise() bails out once the controller has been initialised, which it has
@@ -643,6 +667,11 @@ namespace LibCECTray.ui
     private ConfigTab _selectedTab = ConfigTab.Configuration;
     private StringBuilder _log = new StringBuilder();
     private static readonly int MaxLogLength = 100 * 1024;
+
+    /// <summary>
+    /// Handle to the away-mode power setting notification registration, or IntPtr.Zero when not registered
+    /// </summary>
+    private IntPtr _awayModeNotification = IntPtr.Zero;
 
     /// <summary>
     /// The time to wait for standby to be transmitted and the connection to be closed

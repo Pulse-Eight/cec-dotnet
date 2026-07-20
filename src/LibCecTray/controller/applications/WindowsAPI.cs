@@ -335,6 +335,9 @@ namespace LibCECTray.controller.applications
     public const int PBT_APMRESUMEAUTOMATIC = 0x0012;
     public const int PBT_POWERSETTINGCHANGE = 0x8013;
 
+    // flag for RegisterPowerSettingNotification: hRecipient is a window handle
+    public const int DEVICE_NOTIFY_WINDOW_HANDLE = 0x00000000;
+
     public static Guid GUID_SYSTEM_AWAYMODE = new Guid("98a7f580-01f7-48aa-9c0f-44352c29e5c0");
 
     public const int SC_SCREENSAVE = 0xF140;
@@ -411,6 +414,13 @@ namespace LibCECTray.controller.applications
 
     [DllImport("user32.dll", SetLastError = true)]
     static extern bool SystemParametersInfo(int action, int param, ref int retval, int updini);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern IntPtr RegisterPowerSettingNotification(IntPtr hRecipient, ref Guid PowerSettingGuid, int Flags);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool UnregisterPowerSettingNotification(IntPtr Handle);
     #endregion
 
     /// <summary>
