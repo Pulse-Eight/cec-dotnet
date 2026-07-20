@@ -27,6 +27,7 @@
       this.helpPhysicalAddress = new System.Windows.Forms.ToolTip(this.components);
       this.tbPhysicalAddress = new System.Windows.Forms.TextBox();
       this.helpDeviceType = new System.Windows.Forms.ToolTip(this.components);
+      this.helpAutonomousMode = new System.Windows.Forms.ToolTip(this.components);
       this.cbDeviceType = new System.Windows.Forms.ComboBox();
       this.cbVendorId = new System.Windows.Forms.ComboBox();
       this.lDeviceVendorId = new System.Windows.Forms.Label();
@@ -789,6 +790,10 @@
       this.cbAutonomousMode.TabIndex = 52;
       this.cbAutonomousMode.Text = "global_autonomous_mode";
       this.cbAutonomousMode.UseVisualStyleBackColor = true;
+      this.helpAutonomousMode.SetToolTip(this.cbAutonomousMode, "When enabled, the adapter stays active on the CEC bus while this PC is off, so th" +
+    "e TV or another CEC device can wake it over HDMI. Disable this to keep the adapte" +
+    "r silent when the PC is off, so it can\'t be woken over CEC. Saved to the adapter\'s" +
+    " persistent memory.");
       //
       // pictureBox3
       //
@@ -1055,6 +1060,7 @@
     private System.Windows.Forms.ToolTip helpConnectedHDMIDevice;
     private System.Windows.Forms.ToolTip helpDeviceType;
     private System.Windows.Forms.ToolTip helpPhysicalAddress;
+    private System.Windows.Forms.ToolTip helpAutonomousMode;
     private System.Windows.Forms.NotifyIcon trayIcon;
     private System.Windows.Forms.ContextMenuStrip trayIconMenu;
     private System.Windows.Forms.ToolStripMenuItem tsMenuClose;
