@@ -256,7 +256,7 @@
     <value>txt files (*.txt)|*.txt|All files (*.*)|*.*</value>
   </data>
   <data name="global_activate_source" xml:space="preserve">
-    <value>Make the media player the active source when starting</value>
+    <value>Activate source when the application starts</value>
   </data>
   <data name="global_advanced_mode" xml:space="preserve">
     <value>Advanced mode</value>

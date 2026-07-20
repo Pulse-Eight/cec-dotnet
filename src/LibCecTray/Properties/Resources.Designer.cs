@@ -698,7 +698,7 @@ namespace LibCECTray.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Make the media player the active source when starting.
+        ///   Looks up a localized string similar to Activate source when the application starts.
         /// </summary>
         internal static string global_activate_source {
             get {

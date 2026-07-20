@@ -150,7 +150,7 @@
       this.cbStandbyScreen.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
       this.cbStandbyScreen.Enabled = false;
       this.cbStandbyScreen.FormattingEnabled = true;
-      this.cbStandbyScreen.Location = new System.Drawing.Point(40, 267);
+      this.cbStandbyScreen.Location = new System.Drawing.Point(40, 290);
       this.cbStandbyScreen.Name = "cbStandbyScreen";
       this.cbStandbyScreen.Size = new System.Drawing.Size(123, 21);
       this.cbStandbyScreen.TabIndex = 43;
@@ -748,7 +748,7 @@
       //
       this.cbTVPowerOnWithActivity.AutoSize = true;
       this.cbTVPowerOnWithActivity.Enabled = false;
-      this.cbTVPowerOnWithActivity.Location = new System.Drawing.Point(40, 221);
+      this.cbTVPowerOnWithActivity.Location = new System.Drawing.Point(40, 248);
       this.cbTVPowerOnWithActivity.Name = "cbTVPowerOnWithActivity";
       this.cbTVPowerOnWithActivity.Size = new System.Drawing.Size(241, 17);
       this.cbTVPowerOnWithActivity.TabIndex = 53;
@@ -812,7 +812,7 @@
       // 
       // pbIdleTime
       // 
-      this.pbIdleTime.Location = new System.Drawing.Point(188, 267);
+      this.pbIdleTime.Location = new System.Drawing.Point(188, 290);
       this.pbIdleTime.Name = "pbIdleTime";
       this.pbIdleTime.Size = new System.Drawing.Size(371, 23);
       this.pbIdleTime.TabIndex = 36;
@@ -821,7 +821,7 @@
       // lStandbyScreen
       // 
       this.lStandbyScreen.AutoSize = true;
-      this.lStandbyScreen.Location = new System.Drawing.Point(37, 251);
+      this.lStandbyScreen.Location = new System.Drawing.Point(37, 274);
       this.lStandbyScreen.Name = "lStandbyScreen";
       this.lStandbyScreen.Size = new System.Drawing.Size(82, 13);
       this.lStandbyScreen.TabIndex = 44;
