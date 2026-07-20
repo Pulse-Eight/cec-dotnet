@@ -285,7 +285,6 @@ namespace LibCECTray.ui
       settings.ConnectedDevice.ReplaceControls(this, Configuration.Controls, lConnectedDevice, cbConnectedDevice);
       settings.DeviceType.ReplaceControls(this, Configuration.Controls, lDeviceType, cbDeviceType);
       settings.TVVendor.ReplaceControls(this, Configuration.Controls, cbVendorId);
-      settings.DeviceVendorId.ReplaceControls(this, Configuration.Controls, lDeviceVendorId, cbDeviceVendorId);
       settings.StartHidden.ReplaceControls(this, Configuration.Controls, cbStartMinimised);
 
       settings.WakeDevices.ReplaceControls(this, powerTab.Controls, lWakeDevices, cbWakeDevices);

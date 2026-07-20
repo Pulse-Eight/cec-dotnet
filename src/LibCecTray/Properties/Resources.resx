@@ -678,10 +678,4 @@ CEC will not work (properly) if the TV does not support CEC, or has CEC disabled
   <data name="global_detect_physical_address" xml:space="preserve">
     <value>Auto-detect address</value>
   </data>
-  <data name="global_device_vendor_id" xml:space="preserve">
-    <value>Announce as</value>
-  </data>
-  <data name="vendor_id_default" xml:space="preserve">
-    <value>- default -</value>
-  </data>
 </root>

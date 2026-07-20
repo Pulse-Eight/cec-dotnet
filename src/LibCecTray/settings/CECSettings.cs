@@ -50,7 +50,6 @@ namespace LibCECTray.settings
     public static string KeyDeviceType = "global_device_type";
     public static string KeyTVVendor = "global_tv_vendor";
     public static string KeyOverrideTVVendor = "global_override_tv_vendor";
-    public static string KeyDeviceVendorId = "global_device_vendor_id";
     public static string KeyWakeDevices = "global_wake_devices";
     public static string KeyPowerOffDevices = "global_standby_devices";
     public static string KeyStartHidden = "global_start_hidden";
@@ -272,24 +271,6 @@ namespace LibCECTray.settings
           setting.SettingChanged += OnSettingChanged;
         }
         return _settings[KeyTVVendor].AsSettingVendorId;
-      }
-    }
-
-    /// <summary>
-    /// The vendor id to announce for this device. Unknown to keep libCEC's own identity.
-    /// </summary>
-    public CECSettingVendorId DeviceVendorId {
-      get {
-        if (!_settings.ContainsKey(KeyDeviceVendorId))
-        {
-          CECSettingVendorId setting = new CECSettingVendorId(KeyDeviceVendorId, Resources.global_device_vendor_id,
-                                                              CecVendorId.Unknown, Resources.vendor_id_default, _changedHandler)
-          { Enabled = false };
-          _settings[KeyDeviceVendorId] = setting;
-          setting.Load();
-          setting.SettingChanged += OnSettingChanged;
-        }
-        return _settings[KeyDeviceVendorId].AsSettingVendorId;
       }
     }
 

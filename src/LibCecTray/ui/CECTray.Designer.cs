@@ -30,8 +30,6 @@
       this.helpAutonomousMode = new System.Windows.Forms.ToolTip(this.components);
       this.cbDeviceType = new System.Windows.Forms.ComboBox();
       this.cbVendorId = new System.Windows.Forms.ComboBox();
-      this.lDeviceVendorId = new System.Windows.Forms.Label();
-      this.cbDeviceVendorId = new System.Windows.Forms.ComboBox();
       this.trayIcon = new System.Windows.Forms.NotifyIcon(this.components);
       this.trayIconMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
       this.tsAdvanced = new System.Windows.Forms.ToolStripMenuItem();
@@ -204,27 +202,6 @@
       this.cbVendorId.TabIndex = 28;
       this.cbVendorId.Text = "global_override_tv_vendor";
       this.helpDeviceType.SetToolTip(this.cbVendorId, "Only set this value when autodetection isn\'t working");
-      //
-      // lDeviceVendorId
-      //
-      this.lDeviceVendorId.AutoSize = true;
-      this.lDeviceVendorId.Location = new System.Drawing.Point(358, 143);
-      this.lDeviceVendorId.Name = "lDeviceVendorId";
-      this.lDeviceVendorId.Size = new System.Drawing.Size(65, 13);
-      this.lDeviceVendorId.TabIndex = 53;
-      this.lDeviceVendorId.Text = "global_device_vendor_id";
-      //
-      // cbDeviceVendorId
-      //
-      this.cbDeviceVendorId.Enabled = false;
-      this.cbDeviceVendorId.FormattingEnabled = true;
-      this.cbDeviceVendorId.Location = new System.Drawing.Point(447, 140);
-      this.cbDeviceVendorId.Name = "cbDeviceVendorId";
-      this.cbDeviceVendorId.Size = new System.Drawing.Size(133, 21);
-      this.cbDeviceVendorId.TabIndex = 54;
-      this.cbDeviceVendorId.Text = "global_device_vendor_id";
-      this.helpDeviceType.SetToolTip(this.cbDeviceVendorId, "The vendor that this adapter identifies itself as. Only change this when your TV o" +
-        "nly enables its CEC features for its own brand.");
       //
       // trayIcon
       //
@@ -522,8 +499,6 @@
       this.Configuration.Controls.Add(this.bReloadConfig);
       this.Configuration.Controls.Add(this.cbVendorOverride);
       this.Configuration.Controls.Add(this.cbVendorId);
-      this.Configuration.Controls.Add(this.lDeviceVendorId);
-      this.Configuration.Controls.Add(this.cbDeviceVendorId);
       this.Configuration.Controls.Add(this.lPlayerConfig);
       this.Configuration.Controls.Add(this.lAdapterConfig);
       this.Configuration.Controls.Add(this.cbDeviceType);
@@ -1092,8 +1067,6 @@
     private System.Windows.Forms.Button bReloadConfig;
     private System.Windows.Forms.CheckBox cbVendorOverride;
     private System.Windows.Forms.ComboBox cbVendorId;
-    private System.Windows.Forms.Label lDeviceVendorId;
-    private System.Windows.Forms.ComboBox cbDeviceVendorId;
     private System.Windows.Forms.Label lPlayerConfig;
     private System.Windows.Forms.Label lAdapterConfig;
     private System.Windows.Forms.ComboBox cbDeviceType;

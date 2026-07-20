@@ -165,11 +165,6 @@ namespace LibCECTray.controller
         if (setting is CECSettingVendorId vendorSetting && Settings.OverrideTVVendor.Value)
           Config.TvVendor = vendorSetting.Value;
       }
-      else if (setting.KeyName == CECSettings.KeyDeviceVendorId)
-      {
-        if (setting is CECSettingVendorId vendorSetting)
-          Config.DeviceVendorId = vendorSetting.Value;
-      }
       else if (setting.KeyName == CECSettings.KeyWakeDevices)
       {
         if (setting is CECSettingLogicalAddresses laSetting)
@@ -643,7 +638,6 @@ namespace LibCECTray.controller
       Settings.DeviceType.Value = config.DeviceTypes.Types[0];
       Settings.TVAutoPowerOn.Value = (config.AutoPowerOn == BoolSetting.Enabled);
       Settings.AutonomousMode.Value = (config.AutonomousMode == BoolSetting.Enabled);
-      Settings.DeviceVendorId.Value = config.DeviceVendorId;
 
       if (config.TvVendor != CecVendorId.Unknown)
       {
@@ -749,7 +743,6 @@ namespace LibCECTray.controller
             ActivateSource = Settings.ActivateSource.Value,
             WakeDevices = Settings.WakeDevices.Value,
             PowerOffDevices = Settings.PowerOffDevices.Value,
-            DeviceVendorId = Settings.DeviceVendorId.Value,
           };
           _config.DeviceTypes.Types[0] = Settings.DeviceType.Value;
 
