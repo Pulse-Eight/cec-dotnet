@@ -86,6 +86,7 @@
       this.pbIdleTime = new System.Windows.Forms.ProgressBar();
       this.lStandbyScreen = new System.Windows.Forms.Label();
       this.cbStopTvStandby = new System.Windows.Forms.CheckBox();
+      this.cbSuspendOnSourceChange = new System.Windows.Forms.CheckBox();
       this.lPowerOff = new System.Windows.Forms.Label();
       this.cbPowerOffDevices = new System.Windows.Forms.CheckedListBox();
       this.lWakeDevices = new System.Windows.Forms.Label();
@@ -729,6 +730,7 @@
       this.powerTab.Controls.Add(this.lStandbyScreen);
       this.powerTab.Controls.Add(this.cbStandbyScreen);
       this.powerTab.Controls.Add(this.cbStopTvStandby);
+      this.powerTab.Controls.Add(this.cbSuspendOnSourceChange);
       this.powerTab.Controls.Add(this.lPowerOff);
       this.powerTab.Controls.Add(this.cbPowerOffDevices);
       this.powerTab.Controls.Add(this.lWakeDevices);
@@ -842,9 +844,20 @@
       this.cbStopTvStandby.TabIndex = 42;
       this.cbStopTvStandby.Text = "global_stop_tv_standby";
       this.cbStopTvStandby.UseVisualStyleBackColor = true;
-      // 
+      //
+      // cbSuspendOnSourceChange
+      //
+      this.cbSuspendOnSourceChange.AutoSize = true;
+      this.cbSuspendOnSourceChange.Enabled = false;
+      this.cbSuspendOnSourceChange.Location = new System.Drawing.Point(282, 175);
+      this.cbSuspendOnSourceChange.Name = "cbSuspendOnSourceChange";
+      this.cbSuspendOnSourceChange.Size = new System.Drawing.Size(200, 17);
+      this.cbSuspendOnSourceChange.TabIndex = 53;
+      this.cbSuspendOnSourceChange.Text = "global_suspend_on_source_change";
+      this.cbSuspendOnSourceChange.UseVisualStyleBackColor = true;
+      //
       // lPowerOff
-      // 
+      //
       this.lPowerOff.AutoSize = true;
       this.lPowerOff.Location = new System.Drawing.Point(279, 36);
       this.lPowerOff.Name = "lPowerOff";
@@ -1087,6 +1100,7 @@
     private System.Windows.Forms.Label lStandbyScreen;
     private System.Windows.Forms.ComboBox cbStandbyScreen;
     private System.Windows.Forms.CheckBox cbStopTvStandby;
+    private System.Windows.Forms.CheckBox cbSuspendOnSourceChange;
     private System.Windows.Forms.Label lPowerOff;
     private System.Windows.Forms.CheckedListBox cbPowerOffDevices;
     private System.Windows.Forms.Label lWakeDevices;

@@ -815,6 +815,15 @@ namespace LibCECTray.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Suspend the PC when the TV changes source.
+        /// </summary>
+        internal static string global_suspend_on_source_change {
+            get {
+                return ResourceManager.GetString("global_suspend_on_source_change", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Power on the TV when the PC starts.
         /// </summary>
         internal static string global_tv_auto_power_on {

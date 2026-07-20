@@ -280,6 +280,7 @@ namespace LibCECTray.ui
       settings.PowerOffDevices.ReplaceControls(this, powerTab.Controls, lPowerOff, cbPowerOffDevices);
       settings.ActivateSource.ReplaceControls(this, powerTab.Controls, cbActivateSource);
       settings.StopTvStandby.ReplaceControls(this, powerTab.Controls, cbStopTvStandby);
+      settings.SuspendOnSourceChange.ReplaceControls(this, powerTab.Controls, cbSuspendOnSourceChange);
       settings.StandbyScreen.ReplaceControls(this, powerTab.Controls, lStandbyScreen, cbStandbyScreen);
       settings.TVAutoPowerOn.ReplaceControls(this, powerTab.Controls, cbTVAutoPowerOn);
       settings.AutonomousMode.ReplaceControls(this, powerTab.Controls, cbAutonomousMode);

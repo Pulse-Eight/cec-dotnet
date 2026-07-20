@@ -445,17 +445,7 @@ namespace LibCECTray.controller
           (command.Destination == CecLogicalAddress.Broadcast || command.Destination == _lib.GetLogicalAddresses().Primary) &&
           Settings.StopTvStandby.Value)
       {
-        var key = new CecKeypress(CecUserControlCode.Stop, 0);
-        foreach (var app in _applications)
-          app.SendKey(key, false);
-
-        // SetSuspendState() only returns when the system resumes, so it can't be called
-        // from here: this runs on a libCEC callback thread, and Close() tears down the
-        // connection from the standby handler while we'd still be in it. It can't go on
-        // the gui thread either, or the message pump won't be there to receive
-        // WM_POWERBROADCAST and standby the tv. Suspend from a thread of its own, and
-        // let the PBT_APMSUSPEND handler do the rest.
-        (new Thread(() => Application.SetSuspendState(PowerState.Suspend, false, false))).Start();
+        SuspendPC();
       }
       else if ((command.Opcode == CecOpcode.Play || command.Opcode == CecOpcode.DeckControl) &&
                command.Destination == _lib.GetLogicalAddresses().Primary)
@@ -473,6 +463,24 @@ namespace LibCECTray.controller
     {
       SendKeyToApplications(key);
       return 1;
+    }
+
+    /// <summary>
+    /// Send a Stop keypress to every application and suspend the PC.
+    /// </summary>
+    private void SuspendPC()
+    {
+      var key = new CecKeypress(CecUserControlCode.Stop, 0);
+      foreach (var app in _applications)
+        app.SendKey(key, false);
+
+      // SetSuspendState() only returns when the system resumes, so it can't be called on
+      // this thread: it runs on a libCEC callback, and Close() tears down the connection
+      // from the standby handler while we'd still be in it. It can't go on the gui thread
+      // either, or the message pump won't be there to receive WM_POWERBROADCAST and
+      // standby the tv. Suspend from a thread of its own, and let the PBT_APMSUSPEND
+      // handler do the rest.
+      (new Thread(() => Application.SetSuspendState(PowerState.Suspend, false, false))).Start();
     }
 
     /// <summary>
@@ -637,7 +645,15 @@ namespace LibCECTray.controller
     public override void SourceActivated(CecLogicalAddress logicalAddress, bool activated)
     {
       if (!activated)
+      {
+        // the tv switched to a different source, deactivating us. when configured to do so,
+        // suspend the pc: this hands authority over the pc's power state to whoever is
+        // holding the tv remote, instead of the pc keeping itself (and the tv) awake.
+        if (Settings.SuspendOnSourceChange.Value &&
+            logicalAddress == _lib.GetLogicalAddresses().Primary)
+          SuspendPC();
         return;
+      }
 
       foreach (var app in _applications)
       {

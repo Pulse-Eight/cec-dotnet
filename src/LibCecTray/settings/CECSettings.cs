@@ -55,6 +55,7 @@ namespace LibCECTray.settings
     public static string KeyPowerOffDevices = "global_standby_devices";
     public static string KeyStartHidden = "global_start_hidden";
     public static string KeyStopTvStandby = "global_stop_tv_standby";
+    public static string KeySuspendOnSourceChange = "global_suspend_on_source_change";
     public static string KeyStandbyScreen = "global_standby_screen";
     public static string KeyTVAutoPowerOn = "global_tv_auto_power_on";
     public static string KeyAutonomousMode = "global_autonomous_mode";
@@ -367,6 +368,19 @@ namespace LibCECTray.settings
 
         }
         return _settings[KeyStopTvStandby].AsSettingBool;
+      }
+    }
+
+    public CECSettingBool SuspendOnSourceChange {
+      get {
+        if (!_settings.ContainsKey(KeySuspendOnSourceChange))
+        {
+          CECSettingBool setting = new CECSettingBool(KeySuspendOnSourceChange, Resources.global_suspend_on_source_change, false, _changedHandler);
+          _settings[KeySuspendOnSourceChange] = setting;
+          setting.Load();
+          setting.SettingChanged += OnSettingChanged;
+        }
+        return _settings[KeySuspendOnSourceChange].AsSettingBool;
       }
     }
 
