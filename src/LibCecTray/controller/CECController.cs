@@ -457,24 +457,100 @@ namespace LibCECTray.controller
         // let the PBT_APMSUSPEND handler do the rest.
         (new Thread(() => Application.SetSuspendState(PowerState.Suspend, false, false))).Start();
       }
+      else if ((command.Opcode == CecOpcode.Play || command.Opcode == CecOpcode.DeckControl) &&
+               command.Destination == _lib.GetLogicalAddresses().Primary)
+      {
+        // Some TVs (e.g. Samsung) send their transport buttons as Play / Deck Control
+        // commands aimed at the registered playback device, instead of as keypresses.
+        // libCEC delivers the raw command here; decode the operand, log it, and translate
+        // it to the matching user control code so mapped applications still get an action.
+        HandleTransportCommand(command);
+      }
       return 0;
     }
 
     public override int ReceiveKeypress(CecKeypress key)
     {
-      bool keySent = false;
+      SendKeyToApplications(key);
+      return 1;
+    }
+
+    /// <summary>
+    /// Send a keypress to the first application that accepts it, and log the result.
+    /// </summary>
+    /// <param name="key">The key to send</param>
+    /// <returns>True when an application accepted the key</returns>
+    private bool SendKeyToApplications(CecKeypress key)
+    {
       foreach (var app in _applications)
       {
-        keySent = app.SendKey(key, app.UiName == _gui.SelectedTabName);
-
-        if (keySent)
+        if (app.SendKey(key, app.UiName == _gui.SelectedTabName))
         {
-          string strLog = string.Format("sent key '{0}' to '{1}'", (int) key.Keycode, app.UiName) + Environment.NewLine;
-          _gui.AddLogMessage(strLog);
-          break;
+          _gui.AddLogMessage(string.Format("sent key '{0}' to '{1}'", (int) key.Keycode, app.UiName) + Environment.NewLine);
+          return true;
         }
       }
-      return 1;
+      return false;
+    }
+
+    /// <summary>
+    /// Decode a received Play / Deck Control command, log it, and forward the equivalent
+    /// transport key to the applications.
+    /// </summary>
+    /// <param name="command">The Play or Deck Control command that was received</param>
+    private void HandleTransportCommand(CecCommand command)
+    {
+      byte operand = command.Parameters.Size > 0 ? command.Parameters.Data[0] : (byte)0;
+      string modeName;
+      CecUserControlCode? key = command.Opcode == CecOpcode.Play
+        ? PlayModeToKey(operand, out modeName)
+        : DeckControlToKey(operand, out modeName);
+
+      _gui.AddLogMessage(string.Format("received {0}: {1}", command.Opcode, modeName) + Environment.NewLine);
+
+      if (key.HasValue)
+        SendKeyToApplications(new CecKeypress(key.Value, 0));
+    }
+
+    /// <summary>
+    /// Map a play-mode operand (see cec_play_mode) to a transport key.
+    /// </summary>
+    private static CecUserControlCode? PlayModeToKey(byte mode, out string modeName)
+    {
+      switch (mode)
+      {
+        case 0x24: modeName = "play forward";  return CecUserControlCode.Play;
+        case 0x20: modeName = "play reverse";  return CecUserControlCode.Backward;
+        case 0x25: modeName = "play still";    return CecUserControlCode.Pause;
+        case 0x05: case 0x06: case 0x07:
+          modeName = "fast forward";           return CecUserControlCode.FastForward;
+        case 0x09: case 0x0A: case 0x0B:
+          modeName = "fast reverse";           return CecUserControlCode.Rewind;
+        case 0x15: case 0x16: case 0x17:
+          modeName = "slow forward";           return CecUserControlCode.Forward;
+        case 0x19: case 0x1A: case 0x1B:
+          modeName = "slow reverse";           return CecUserControlCode.Backward;
+        default:
+          modeName = string.Format("unknown play mode (0x{0:x2})", mode);
+          return null;
+      }
+    }
+
+    /// <summary>
+    /// Map a deck-control-mode operand to a transport key.
+    /// </summary>
+    private static CecUserControlCode? DeckControlToKey(byte mode, out string modeName)
+    {
+      switch ((CecDeckControlMode)mode)
+      {
+        case CecDeckControlMode.SkipForwardWind:   modeName = "skip forward / wind";   return CecUserControlCode.FastForward;
+        case CecDeckControlMode.SkipReverseRewind: modeName = "skip reverse / rewind"; return CecUserControlCode.Rewind;
+        case CecDeckControlMode.Stop:              modeName = "stop";                  return CecUserControlCode.Stop;
+        case CecDeckControlMode.Eject:             modeName = "eject";                 return CecUserControlCode.Eject;
+        default:
+          modeName = string.Format("unknown deck control mode (0x{0:x2})", mode);
+          return null;
+      }
     }
 
     public override int ReceiveLogMessage(CecLogMessage message)
