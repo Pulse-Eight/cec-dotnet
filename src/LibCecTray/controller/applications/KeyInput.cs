@@ -37,6 +37,8 @@ using System.Collections.Generic;
 using System;
 using System.Globalization;
 using System.Text;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace LibCECTray.controller.applications
 {
@@ -219,11 +221,35 @@ namespace LibCECTray.controller.applications
       return this;
     }
 
+    /// <summary>
+    /// Check whether this input contains the given key
+    /// </summary>
+    /// <param name="keyCode">The key to look for</param>
+    /// <returns>True when the key is part of this input</returns>
+    private bool ContainsKey(WindowsAPI.VirtualKeyCode keyCode)
+    {
+      foreach (var input in _input)
+        if (input.Data.Keyboard.Flags == 0 && input.Data.Keyboard.KeyCode == (ushort)keyCode)
+          return true;
+      return false;
+    }
+
     public override bool Transmit(IntPtr windowHandle)
     {
       var inputAr = ToArray();
       if (inputAr.Length == 0)
         return false;
+
+      // a VK_SLEEP keystroke injected via SendInput does not suspend the system on modern
+      // windows, so a button mapped to 'sleep' appears to do nothing. suspend the system
+      // directly instead. Application.SetSuspendState() only returns when the system
+      // resumes, so run it on a thread of its own and let the PBT_APMSUSPEND handler send
+      // the tv to standby.
+      if (ContainsKey(WindowsAPI.VirtualKeyCode.VK_SLEEP))
+      {
+        (new Thread(() => Application.SetSuspendState(PowerState.Suspend, false, false))).Start();
+        return true;
+      }
 
       try
       {
