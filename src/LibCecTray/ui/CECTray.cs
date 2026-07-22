@@ -428,7 +428,13 @@ namespace LibCECTray.ui
       }
       else
       {
-        tbLog.Text = _log.ToString();
+        // _log is mutated on the libCEC callback thread (AddLogMessage), so snapshot
+        // it under the lock: StringBuilder.ToString() throws chunkLength out-of-range
+        // if another thread Append()s or Remove()s while it runs.
+        string log;
+        lock (_logLock)
+          log = _log.ToString();
+        tbLog.Text = log;
         tbLog.Select(tbLog.Text.Length, 0);
         tbLog.ScrollToCaret();
       }
@@ -471,10 +477,13 @@ namespace LibCECTray.ui
 
     public void AddLogMessage(string message)
     {
-      _log.Append(message);
-      if (_log.Length > MaxLogLength)
+      lock (_logLock)
       {
-        _log.Remove(0, _log.Length - MaxLogLength);
+        _log.Append(message);
+        if (_log.Length > MaxLogLength)
+        {
+          _log.Remove(0, _log.Length - MaxLogLength);
+        }
       }
 
       if (_selectedTab == ConfigTab.Log)
@@ -483,7 +492,8 @@ namespace LibCECTray.ui
 
     private void BClearLogClick(object sender, EventArgs e)
     {
-      _log = new StringBuilder();
+      lock (_logLock)
+        _log = new StringBuilder();
       UpdateLog();
     }
 
@@ -507,8 +517,11 @@ namespace LibCECTray.ui
         }
         else
         {
+          string log;
+          lock (_logLock)
+            log = _log.ToString();
           StreamWriter writer = new StreamWriter(fs);
-          writer.Write(_log.ToString());
+          writer.Write(log);
           writer.Close();
           fs.Close();
           fs.Dispose();
@@ -679,6 +692,7 @@ namespace LibCECTray.ui
     #region Class members
     private ConfigTab _selectedTab = ConfigTab.Configuration;
     private StringBuilder _log = new StringBuilder();
+    private readonly object _logLock = new object();
     private static readonly int MaxLogLength = 100 * 1024;
 
     /// <summary>
