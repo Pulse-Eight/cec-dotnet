@@ -146,7 +146,10 @@ namespace LibCECTray.settings
                              FormattingEnabled = true,
                              Name = KeyName,
                              Size = new System.Drawing.Size(Width, Height),
-                             AutoCompleteMode = AutoCompleteMode.Append,
+                             // fixed-item pickers: a non-editable drop-down. (An editable
+                             // combo with a sourceless AutoCompleteMode.Append leaves the
+                             // value text selected/highlighted on .NET 8 WinForms.)
+                             DropDownStyle = ComboBoxStyle.DropDownList,
                              Enabled = InitialEnabledValue
                            };
 

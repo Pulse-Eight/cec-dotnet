@@ -1,13 +1,11 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B119505D-5CD1-48E4-BED1-9C2BF26153D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CecSharpTester", "..\src\CecSharpTester\netfx\CecSharpTester.csproj", "{B6A7F3A9-F47C-41E5-9754-0BFF233B1172}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CecSharpCoreTester", "..\src\CecSharpTester\netcore\CecSharpCoreTester.csproj", "{8513978A-4599-4E55-857A-199F7C533186}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CecSharpTester", "..\src\CecSharpTester\netcore\CecSharpTester.csproj", "{8513978A-4599-4E55-857A-199F7C533186}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibCECTray", "..\src\LibCecTray\LibCECTray.csproj", "{58C106FE-C159-46D3-97E1-73AB83232670}"
 EndProject
@@ -19,14 +17,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B6A7F3A9-F47C-41E5-9754-0BFF233B1172}.Debug|x64.ActiveCfg = Debug|x64
-		{B6A7F3A9-F47C-41E5-9754-0BFF233B1172}.Debug|x64.Build.0 = Debug|x64
-		{B6A7F3A9-F47C-41E5-9754-0BFF233B1172}.Debug|x86.ActiveCfg = Debug|x86
-		{B6A7F3A9-F47C-41E5-9754-0BFF233B1172}.Debug|x86.Build.0 = Debug|x86
-		{B6A7F3A9-F47C-41E5-9754-0BFF233B1172}.Release|x64.ActiveCfg = Release|x64
-		{B6A7F3A9-F47C-41E5-9754-0BFF233B1172}.Release|x64.Build.0 = Release|x64
-		{B6A7F3A9-F47C-41E5-9754-0BFF233B1172}.Release|x86.ActiveCfg = Release|x86
-		{B6A7F3A9-F47C-41E5-9754-0BFF233B1172}.Release|x86.Build.0 = Release|x86
 		{58C106FE-C159-46D3-97E1-73AB83232670}.Debug|x64.ActiveCfg = Debug|x64
 		{58C106FE-C159-46D3-97E1-73AB83232670}.Debug|x64.Build.0 = Debug|x64
 		{58C106FE-C159-46D3-97E1-73AB83232670}.Debug|x86.ActiveCfg = Debug|x86

@@ -34,6 +34,7 @@
 */
 
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 using LibCECTray.controller.applications;
 using LibCECTray.ui;
@@ -66,6 +67,12 @@ namespace LibCECTray
       {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
+        // The forms were designed against the .NET Framework default font
+        // (Microsoft Sans Serif 8.25pt, AutoScaleDimensions 6x13). .NET 8 WinForms
+        // defaults to Segoe UI 9pt, which rescales every AutoScaleMode.Font form
+        // and shifts/overlaps the controls. Pin the legacy font so the layout
+        // matches the design. Must run before the first form is created.
+        Application.SetDefaultFont(new Font("Microsoft Sans Serif", 8.25f));
         try
         {
           Application.Run(Instance);

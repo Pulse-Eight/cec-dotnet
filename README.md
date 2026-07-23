@@ -6,59 +6,60 @@ receivers, etc.) — primarily via Pulse-Eight's USB-CEC adapter.
 
 This repository contains the managed (C#) apps only. It is **not** standalone: it
 is consumed as the `src/dotnet` git submodule of libCEC and builds against the
-managed wrapper assemblies that libCEC produces. See
+`LibCecSharp` binding that libCEC produces. See
 [Relationship to libCEC](#relationship-to-libcec) below.
 
 ## What's in here
 
 | Project | Path | Description |
 | --- | --- | --- |
-| **cec-tray** | `src/LibCecTray` | Windows system-tray application (`cec-tray.exe`) to configure the adapter, map keys to applications (Kodi, Windows Media Center, foreground app), and control connected CEC devices. .NET Framework 4.5, WinForms. |
-| **CecSharpTester** (.NET Framework) | `src/CecSharpTester/netfx` | Minimal console sample showing how to open the adapter and log CEC traffic. Targets .NET Framework 4.5. |
-| **CecSharpCoreTester** (.NET) | `src/CecSharpTester/netcore` | The same console sample targeting modern .NET (net8.0). |
+| **cec-tray** | `src/LibCecTray` | Windows system-tray application (`cec-tray.exe`) to configure the adapter, map keys to applications (Kodi, Windows Media Center, foreground app), and control connected CEC devices. WinForms, `net8.0-windows` (Windows only). |
+| **CecSharpTester** | `src/CecSharpTester/netcore` | Minimal console sample showing how to open the adapter and log CEC traffic. Targets `net8.0`, so it runs anywhere the binding does. |
 
-Both testers compile the shared sample source `src/CecSharpTester/CecSharpClient.cs`
-and are the best starting point for learning the API.
+The tester compiles the shared sample source `src/CecSharpTester/CecSharpClient.cs`
+and is the best starting point for learning the API.
 
 ## Relationship to libCEC
 
-The C# code here talks to libCEC through a **C++/CLI wrapper**, not directly. The
-wrapper is what exposes the managed `CecSharp` namespace (`LibCecSharp`,
+The C# code here talks to libCEC through the **`LibCecSharp` binding**, not
+directly. The binding exposes the managed `CecSharp` namespace (`LibCecSharp`,
 `LibCECConfiguration`, `CecCommand`, `CecCallbackMethods`, …).
 
-That wrapper is **not part of this repository** — it lives in the libCEC repo:
+That binding is **not part of this repository** — it lives in the libCEC repo at
+`src/dotnetlib` and produces **`LibCecSharp.dll`**. It is a single, pure-C#
+assembly that binds the native library through P/Invoke over libCEC's C API,
+targets **net8.0**, and builds with the .NET SDK (no MSVC `/clr`). It replaced two
+Windows-only C++/CLI wrappers (`LibCecSharp` for .NET Framework and
+`LibCecSharpCore` for net8.0); both apps here now reference the one assembly.
 
-- `src/dotnetlib/LibCecSharp` → **`LibCecSharp.dll`** — `CecSharp` namespace for .NET Framework (used by cec-tray and the netfx tester).
-- `src/dotnetlib/LibCecSharpCore` → **`LibCecSharpCore.dll`** — the same `CecSharp` namespace for modern .NET (used by CecSharpCoreTester).
-
-These assemblies wrap the native `cec.dll`. The build layers are:
+The build layers are:
 
 ```
 cec-tray / CecSharpTester        (this repo, C#)
         │  references
         ▼
-LibCecSharp(.Core).dll           (libcec/src/dotnetlib, C++/CLI wrapper — the CecSharp namespace)
-        │  wraps
+LibCecSharp.dll                  (libcec/src/dotnetlib — pure C# P/Invoke binding, the CecSharp namespace)
+        │  P/Invoke
         ▼
-cec.dll                          (libcec/src/libcec, native C/C++ engine)
+cec.dll / libcec.so              (libcec/src/libcec, native C/C++ engine)
 ```
 
-The `.csproj` files here reference the wrapper by `HintPath` into libCEC's shared
+The `.csproj` files here reference the binding by `HintPath` into libCEC's shared
 output folder, e.g.:
 
 ```xml
 <Reference Include="LibCecSharp">
-  <HintPath>..\..\..\..\build\$(Configuration)\$(Platform)\LibCecSharp.dll</HintPath>
+  <HintPath>..\..\..\..\build\$(Configuration)\$(Platform)\net8.0\LibCecSharp.dll</HintPath>
 </Reference>
 ```
 
-so the wrapper (and therefore libCEC) must be built **before** these apps.
+so the binding (and therefore libCEC) must be built **before** these apps.
 
 ## Building
 
-This is a **Windows-only** build (the wrappers are C++/CLI). Do not open this
-solution and build it on its own first — build it through libCEC's orchestrator,
-which builds the native library and the wrappers, generates these projects from
+`cec-tray` is Windows-only (WinForms); the `CecSharpTester` console sample is
+`net8.0` and runs anywhere. Build them through libCEC's orchestrator, which builds
+the native library and the `LibCecSharp` binding, generates these projects from
 their `.in` templates, and then compiles the apps in the right order.
 
 From a checkout of libCEC:
@@ -76,8 +77,10 @@ installer; `-vs` generates the Visual Studio project files for development;
 `CLAUDE.md`/README for the full toolchain requirements (Visual Studio, CMake,
 Python 3.12+).
 
-Build artifacts land in libCEC's `build\<Configuration>\<Platform>\`:
-`cec-tray.exe`, and `net8.0\CecSharpCoreTester.exe`.
+Build artifacts land in libCEC's `build\<Configuration>\<Platform>\net8.0\`:
+`cec-tray.exe` and `CecSharpTester.exe`, alongside `LibCecSharp.dll`.
+Running them needs the [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)
+(the installer offers to install it).
 
 > **Note:** several project files here (`*.csproj`, `Properties/AssemblyInfo.cs`)
 > are **generated** from `.in` templates by libCEC's cmake step so the version
