@@ -17,7 +17,7 @@
     <Platforms>x86;x64</Platforms>
     <!-- keep using the cmake-generated Properties\AssemblyInfo.cs -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <Version>8.0.0.0</Version>
+    <Version>8.1.0.0</Version>
     <Company>Pulse-Eight Limited</Company>
     <Authors>Lars Op den Kamp</Authors>
     <Product>libCEC</Product>
