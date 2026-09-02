@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Pulse-Eight Limited")]
 [assembly: AssemblyProduct("libCEC Tray")]
-[assembly: AssemblyCopyright("Copyright (c) Pulse-Eight Limited 2011-2020")]
+[assembly: AssemblyCopyright("Copyright (c) Pulse-Eight Limited 2011-2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

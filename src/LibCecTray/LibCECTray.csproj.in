@@ -21,7 +21,7 @@
     <Company>Pulse-Eight Limited</Company>
     <Authors>Lars Op den Kamp</Authors>
     <Product>libCEC</Product>
-    <Copyright>Copyright (c) Pulse-Eight Limited 2011-2025</Copyright>
+    <Copyright>Copyright (c) Pulse-Eight Limited 2011-2026</Copyright>
     <NoWarn>$(NoWarn);CA1416</NoWarn>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <OutputPath>..\..\..\..\build\$(Configuration)\$(Platform)\net8.0\</OutputPath>
